@@ -63,6 +63,7 @@ The following diagram briefly describes the main directories and files:
 │   ├── routes.ts - app routes definitions
 │   ├── template.ejs - index.html template to be built by webpack 
 │   └── types.js - data, state and API types
+├── data-preprocessing - Python scripts used for data preprocessing
 ├── test - a few tests
 ├── tools - custom webpack plugins
 ├── types - TypeScript declarations for non-code imports (SVG, MP3)
@@ -96,6 +97,23 @@ The following diagram briefly describes the main directories and files:
 2. You are ready to go.
 3. Use `yarn start` to start dev server with HMR.
 4. Then open `http://localhost:3000/` in the browser.
+
+
+### Data preprocessing
+
+The data preprocessing is done in Python 3.9 and all the scripts are part of this repository.
+The scripts are located in the [data-preprocessing](./data-preprocessing) directory.
+
+To run the current version of the preprocessing pipeline:
+
+1. Change into the `data-preprocessing` dir: `cd data-preprocessing`
+2. Download the data of some corpus from [here](https://archive.ics.uci.edu/ml/datasets/Bag+of+Words).
+3. Create and activate a new virtual environment (optional).
+4. Install the dependencies using [Poetry] (`poetry install`) or [pip] (`python -m pip install .`) 
+5. Run the `main.py` script, for example like this:
+```bash
+python main.py --corpus_name kos --preprocess bow --method pca --save_figure
+```
 
 
 ### Available commands
@@ -179,3 +197,7 @@ builds. There are 3 configuration files that affect the deployment behavior:
 [mdn-sri]: https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 
 [web-dev-maskable-icons]: https://web.dev/maskable-icon/
+
+[Potery]: https://python-poetry.org/
+
+[pip]: https://pypi.org/project/pip/
