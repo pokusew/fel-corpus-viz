@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+@import "general/functions";
+@import "general/config";
+@import "general/mixins";
+
+// imports should be organized in the order
+// from the most common to the most specific styles
+
+@import "general/base";
+
+@import "components/spinkit";
+
+@import "components/layout";
+@import "components/app";

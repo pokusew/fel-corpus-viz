@@ -1,0 +1,29 @@
+{
+	// https://www.devextent.com/create-service-worker-typescript/
+	"compilerOptions": {
+		// https://stackoverflow.com/questions/61305578/what-typescript-configuration-produces-output-closest-to-node-js-14-capabilities/61305579#61305579
+		"lib": [
+			"ES2022",
+			"WebWorker"
+		],
+		"module": "CommonJS",
+		"target": "ES2022",
+		// TODO: maybe true Process & infer types from .js files.
+		"allowJs": true,
+		// Don't emit; allow Babel to transform files.
+		"noEmit": true,
+		// TODO: Enable strictest settings like strictNullChecks & noImplicitAny.
+		"strict": false,
+		"strictNullChecks": true,
+		// Import non-ES modules as default imports.
+		"esModuleInterop": true,
+		"jsx": "preserve",
+		"resolveJsonModule": true
+	},
+	"exclude": [
+		// see https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-a-file-in-the-exclude-list-still-picked-up-by-the-compiler
+		// use `yarn tsc --listFiles` to list what files are included in the compilation,
+		// and `yarn tsc --traceResolution` to see why they were included
+		"**/node_modules/**/*"
+	]
+}

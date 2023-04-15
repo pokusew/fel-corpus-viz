@@ -1,0 +1,29 @@
+# Netlify config
+# docs: https://docs.netlify.com/configure-builds/file-based-configuration/
+# useful TOML sytax docs: https://github.com/toml-lang/toml
+
+[build]
+	# base = ""
+	publish = "dist/"
+	command = "yarn build"
+
+	[build.processing]
+		# if skip_processing = true, all other settings are ignored
+		skip_processing = true
+
+		[build.processing.css]
+			bundle = false
+			minify = false
+
+		[build.processing.js]
+			bundle = false
+			minify = false
+
+		[build.processing.html]
+			# Rewrite link URLs to pretty URLs (/about.html -> /about, /about/index.html -> /about/)
+			# does not seem to be working, additionally it causes CDN changes
+			# see https://community.netlify.com/t/cdn-change-netlify-cdn-or-cloudfront/3582
+			pretty_urls = false
+
+		[build.processing.images]
+			compress = false

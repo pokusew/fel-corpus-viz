@@ -1,0 +1,50 @@
+# Netlify redirects and rewrites config
+# see https://docs.netlify.com/routing/redirects/
+# useful tool for quick validation: https://play.netlify.com/redirects
+# notable caveats:
+# - the rules are processed in order from top to bottom, so the most specific rules comes first, then add general ones
+# - ! after status code forces the rule even if file matching the URL exists
+#   see https://docs.netlify.com/routing/redirects/rewrites-proxies/#shadowing
+# - all rules are trailing-slash-insensitive as all URLs are normalized before the rules are processed
+#   see https://docs.netlify.com/routing/redirects/redirect-options/#trailing-slash
+# - rules in the _redirects file are always processed first, followed by rules in the netlify.toml
+
+
+# Netlify app domain to primary domain
+# TODO: enable once custom domain is setup
+# http://some-app-name.netlify.com/*   https://custom.domain.com/:splat 301!
+# https://some-app-name.netlify.com/*  https://custom.domain.com/:splat 301!
+# http://some-app-name.netlify.app/*   https://custom.domain.com/:splat 301!
+# https://some-app-name.netlify.app/*  https://custom.domain.com/:splat 301!
+
+
+# force HTTPS (actually not needed since it's handled automatically by Netlify)
+
+
+# Pretty canonical URLs
+# not needed when Settings > Build & deploy > Post processing
+#   > Asset optimization - Pretty URLs is enabled (or via netlify.toml)
+# note: Netlify's Pretty URLs setting does not seem to take any affect
+#       and it causes CDN side-effects so it is disabled and handled manually here
+/index.html    /    301!
+/index         /    301!
+
+
+# TODO: remove once we have a favicon
+/favicon.ico   /favicon.ico   404
+
+
+# this is a fully client side only SPA (Single Page App)
+# see https://docs.netlify.com/routing/redirects/rewrites-proxies/#history-pushstate-and-single-page-apps
+/*    /index.html    200
+
+
+# 404 not applicable in this app
+# as everything may be valid URL since routing is done on the client side
+# # 404 custom error pages
+# # note: consider using localized versions (different translations)
+# # prevent 404.html from being viewed directly with 200 OK code and thus get indexed
+# /404.html    /404.html    404!
+# /404         /404.html    404!
+# # 404 when no file matches URL
+# /*    /404.html    404

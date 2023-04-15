@@ -1,0 +1,115 @@
+//
+// App
+// --------------------------------------------------
+
+.app {
+	display: grid;
+	grid-template-rows: remy(50px) 1fr remy(100px);
+	grid-template-columns: 1fr;
+	grid-template-areas:
+		"header"
+		"content"
+		"footer";
+}
+
+.app-header {
+	grid-area: header;
+	display: block;
+	margin: 0;
+	padding: 0;
+	background-color: $gray-lighter;
+
+	> .container {
+		display: flex;
+	}
+
+	.app-name {
+		font-size: 1.25rem;
+		align-self: center;
+		margin: 0 1rem 0 0;
+	}
+
+	.app-navigation {
+		flex: 1;
+		display: flex;
+		justify-content: space-between;
+
+
+		ul {
+			display: flex;
+			margin: 0;
+			padding: 0;
+			align-items: center;
+
+			> li {
+				display: block;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+
+				&.user {
+					height: auto;
+					padding: 0 0 0 1rem;
+				}
+
+				> a {
+					display: flex;
+					height: 100%;
+					align-items: center;
+					margin: 0;
+					padding: 0 1rem;
+					border-top: 2px solid transparent;
+					border-left: none;
+					border-right: none;
+					border-bottom: 2px solid transparent;
+					color: $black;
+
+					&, &:focus, &:hover {
+						color: $black;
+						text-decoration: none;
+					}
+
+					&:focus, &:hover {
+						background-color: darken($gray-lighter, 10%);
+					}
+
+					&.active {
+						color: $brand-primary;
+						border-bottom: 2px solid $brand-primary;
+					}
+
+				}
+			}
+
+		}
+
+	}
+
+}
+
+.app-content {
+	grid-area: content;
+	display: block;
+	position: relative;
+	margin: 0;
+	padding: 0;
+
+	> .container {
+		padding: 1rem 1rem 0 1rem;
+	}
+
+}
+
+.app-footer {
+	grid-area: footer;
+	display: flex;
+	flex-direction: column;
+	background-color: $gray-lighter;
+	justify-content: center;
+	text-align: center;
+
+	p {
+		margin: 0;
+	}
+
+}

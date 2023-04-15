@@ -1,0 +1,31 @@
+#
+# Browserslist config
+# see https://github.com/browserslist/browserslist
+# used by:
+# - @babel/preset-env
+#   see https://babeljs.io/docs/en/babel-preset-env#browserslist-integration
+# - autoprefixer in webpack config
+#   see https://github.com/postcss/autoprefixer#browsers
+#
+
+# note: When BROWSERSLIST_ENV or NODE_ENV do not mach any of the envs configured below
+#       Browserslist will firstly look for production queries and then use defaults.
+#       see: https://github.com/browserslist/browserslist
+
+# note: to see what browser the query actually matches use:
+#       NODE_ENV=test npx browserslist
+#       npx browserslist
+
+[production]
+# this is used when building assets via webpack
+last 2 version
+not ie <= 11
+not ie_mob <= 11
+
+# [modern]
+# last 1 chrome version
+# last 1 firefox version
+
+[test]
+# this is used when running tests, transpiling config files, etc.
+current node

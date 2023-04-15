@@ -1,0 +1,17 @@
+//
+// Functions
+// --------------------------------------------------
+
+@use "sass:math";
+
+@function remy($value, $base: 16px) {
+	// see https://youtrack.jetbrains.com/issue/WEB-51021
+	// noinspection CssInvalidFunction
+	@return math.div($value, $base) * 1rem;
+}
+
+@function emy($value, $base) {
+	// see https://youtrack.jetbrains.com/issue/WEB-51021
+	// noinspection CssInvalidFunction
+	@return math.div($value, $base) * 1em;
+}

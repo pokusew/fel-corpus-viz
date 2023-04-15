@@ -1,0 +1,101 @@
+#
+# GitHub Action Workflow
+#   reference: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
+#
+#   useful example: https://github.com/mikeal/bundle-size-action/blob/master/.github/workflows/mikeals-workflow.yml
+#
+
+name: Build and Test
+
+on:
+  # see also https://github.community/t/how-to-trigger-an-action-on-push-or-pull-request-but-not-both/16662
+  push:
+    branches:
+      - main
+      - next
+  pull_request:
+    branches:
+      - main
+
+env:
+  # TODO: forces AVA (and other) to print colorized output, better solution?
+  FORCE_COLOR: true
+
+jobs:
+
+  build:
+
+    name: Unit tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        node-version: [ 18.x ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        # https://github.com/actions/setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          # consider built-in cache feature
+          # see https://github.com/actions/setup-node/blob/main/docs/advanced-usage.md#caching-packages-data
+
+      - name: Cache node_modules
+        # https://github.com/actions/cache
+        # TODO: https://github.com/actions/cache/blob/main/examples.md#node---npm
+        # TODO: https://github.com/actions/cache/blob/main/examples.md#node---yarn
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-node_modules-${{ hashFiles('yarn.lock') }}
+
+      - name: Install dependencies
+        # skip if cache was restored
+        # see https://github.com/actions/cache#skipping-steps-based-on-cache-hit
+        if: steps.cache.outputs.cache-hit != 'true'
+        # note: Yarn in pre-installed in the VM image
+        # (see https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md)
+        run: yarn --frozen-lockfile
+
+      - name: Run unit tests
+        # https://askubuntu.com/a/731237
+        run: |
+          mkdir -p temp
+          yarn test |& tee temp/ava-test-output.txt
+        shell: bash
+
+      - name: Run ESLint
+        if: ${{ success() || failure() }}
+        run: |
+          mkdir -p temp
+          yarn lint |& tee temp/eslint-output.txt
+        shell: bash
+
+      # TODO: re-enable once we fix tsc config
+      # - name: Run tsc
+      #   if: ${{ success() || failure() }}
+      #   run: |
+      #     mkdir -p temp
+      #     yarn tsc |& tee temp/tsc-output.txt
+      #   shell: bash
+
+      - name: Store test results
+        if: ${{ success() || failure() }}
+        # https://github.com/actions/upload-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            temp/ava-test-output.txt
+            temp/eslint-output.txt
+            temp/tsc-output.txt
