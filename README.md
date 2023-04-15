@@ -2,10 +2,10 @@
 
 Visualization of a document corpus using D3.js
 
-👉 Available online at [TODO](TODO)
+👉 Available online at [pokusew-corpus-viz.netlify.app](https://pokusew-corpus-viz.netlify.app/)
 
-The code is written in **[TypeScript]**
-and **[React.js]**. See more in the [Architecture](#architecture) section.
+The code is written in **[TypeScript]**, **[D3.js]** and **[React.js]**.
+See more in the [Architecture](#architecture) section.
 
 🚧 **Note:** This is work in progress.
 
@@ -18,7 +18,6 @@ and **[React.js]**. See more in the [Architecture](#architecture) section.
 
 - [Description](#description)
 - [Architecture](#architecture)
-	- [Technology highlights](#technology-highlights)
 	- [Project structure](#project-structure)
 - [Development](#development)
 	- [Requirements](#requirements)
@@ -39,7 +38,7 @@ TODO
 _Currently_, it is a client-side-only application (SPA).
 **It runs completely in the browser**.
 
-The code is written in **[TypeScript]** and **[React.js]**.
+The code is written in **[TypeScript]**, **[D3.js]** and **[React.js]**.
 
 The project has [just a few production dependencies](./package.json#L31-L35).
 Everything else is implemented from scratch.
@@ -132,6 +131,8 @@ builds. There are 3 configuration files that affect the deployment behavior:
 <!-- links references -->
 
 [pokusew/testbook-ocr]: https://github.com/pokusew/testbook-ocr
+
+[D3.js]: https://d3js.org/
 
 [React.js]: https://reactjs.org/
 
