@@ -25,6 +25,9 @@ export default merge(baseConfig, {
 		index: [
 			path.join(__dirname, 'app/index'),
 		],
+		another: [
+			path.join(__dirname, 'app/another'),
+		],
 		// handled the InjectManifest plugin
 		// sw: [
 		// 	path.join(__dirname, 'app/sw/sw'),
@@ -143,6 +146,13 @@ export default merge(baseConfig, {
 			template: './app/index.ejs',
 			templateParameters,
 			chunks: ['index'],
+			xhtml: true,
+		}),
+		new HtmlWebpackPlugin({
+			filename: 'another.html',
+			template: './app/another.ejs',
+			templateParameters,
+			chunks: ['another'],
 			xhtml: true,
 		}),
 	],
