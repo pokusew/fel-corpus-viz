@@ -61,10 +61,10 @@ The following diagram briefly describes the main directories and files:
 │   ├── manifest.json - a web app manifest for PWA
 │   ├── robots.txt
 │   ├── routes.ts - app routes definitions
-│   ├── template.ejs - index.html template to be built by Webpack 
+│   ├── template.ejs - index.html template to be built by webpack 
 │   └── types.js - data, state and API types
 ├── test - a few tests
-├── tools - custom Webpack plugins
+├── tools - custom webpack plugins
 ├── types - TypeScript declarations for non-code imports (SVG, MP3)
 ├── .browserslistrc - Browserslist config
 ├── .eslintrc.js - ESLint config
@@ -75,7 +75,7 @@ The following diagram briefly describes the main directories and files:
 ├── package.json
 ├── babel.config.js - PostCSS config
 ├── tsconfig.json - main TypeScript config
-├── webpack.config.*.js - Webpack configs
+├── webpack.config.*.js - webpack configs
 └── yarn.lock
 ```
 
