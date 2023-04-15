@@ -47,3 +47,6 @@ __pycache__
 
 # playground
 /temp/
+
+# data preprocessing
+data-preprocessing/data/
