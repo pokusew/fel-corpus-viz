@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "classnames": "^2.3.2",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -43,6 +45,8 @@
     "@babel/preset-typescript": "^7.21.4",
     "@babel/register": "^7.21.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
+    "@types/d3-selection": "^3.0.5",
+    "@types/d3-zoom": "^3.0.2",
     "@types/node": "^18.15.11",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.58.0",

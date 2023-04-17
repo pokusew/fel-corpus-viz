@@ -2,4 +2,4 @@
 
 import './styles/main.scss';
 
-console.log('hello from another.ts');
+import './demo/bubbles';

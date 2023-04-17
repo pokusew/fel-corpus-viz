@@ -1,0 +1,100 @@
+//
+// Buttons
+// --------------------------------------------------
+
+.btn {
+	display: inline-block;
+	margin: 0;
+	padding: .5rem 1rem;
+	background-image: none;
+	background-color: $gray-lighter;
+	text-decoration: none;
+	appearance: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1rem;
+	line-height: inherit;
+
+	&:hover, &:focus {
+		text-decoration: none;
+		appearance: none;
+		background-color: darken($gray-lighter, 10%);
+	}
+
+	&.btn-flex {
+		display: flex;
+		align-items: center;
+
+		kbd {
+			margin: 0 0 0 0.5rem;
+		}
+
+	}
+
+	&.btn-lg {
+		padding: .75rem 1.25rem;
+	}
+
+	&.btn-sm {
+		font-size: .875rem;
+		padding: .25rem 0.5rem;
+	}
+
+	&.btn-primary {
+		background-color: $brand-primary;
+		color: $white;
+
+		&:hover, &:focus {
+			background-color: darken($brand-primary, 10%);
+			color: $white;
+		}
+	}
+
+	&.btn-warning {
+		background-color: $brand-warning;
+		color: $white;
+
+		&:hover, &:focus {
+			background-color: darken($brand-warning, 10%);
+			color: $white;
+		}
+	}
+
+	&.btn-danger {
+		background-color: $brand-danger;
+		color: $white;
+
+		&:hover, &:focus {
+			background-color: darken($brand-danger, 10%);
+			color: $white;
+		}
+	}
+
+	&.btn-success {
+		background-color: $brand-success;
+		color: $white;
+
+		&:hover, &:focus {
+			background-color: darken($brand-success, 10%);
+			color: $white;
+		}
+	}
+
+}
+
+.btn + .btn {
+	margin: 0 0 0 1rem;
+}
+
+.btn.btn-sm + .btn.btn-sm {
+	margin: 0 0 0 .5rem;
+}
+
+.btn-group {
+	.btn {
+		margin: 0 1rem 1rem 0;
+		&:last-of-type {
+			margin: 0 0 1rem 0;
+		}
+	}
+}
