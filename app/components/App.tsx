@@ -6,12 +6,6 @@ import Demo from './Demo';
 
 const App = () => {
 
-	const [counter, setCounter] = useState<number>(0);
-
-	const handleClick = useCallback((event) => {
-		setCounter(prevValue => prevValue + 1);
-	}, [setCounter]);
-
 	return (
 		<>
 
