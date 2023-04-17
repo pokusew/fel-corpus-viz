@@ -3,7 +3,7 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import App from './compoments/App';
+import App from './components/App';
 
 import './styles/main.scss';
 import './robots.txt';
