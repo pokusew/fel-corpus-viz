@@ -31,7 +31,7 @@ let minX = 0;
 let minY = 0;
 let maxX = 0;
 let maxY = 0;
-const r = 0.3;
+const r = 0.1;
 
 
 function renderData(data: Point[]) {
