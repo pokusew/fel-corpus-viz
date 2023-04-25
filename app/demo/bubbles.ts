@@ -1,18 +1,18 @@
 "use strict";
 
 // docs: https://github.com/d3/d3-selection
-import { select, selectAll } from 'd3-selection';
+import { select } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
+import { loadDataFromFile } from './load-data';
+import txtFilePath from '../data/doc_embeddings.kos.txt';
 
 
 const width = 800;
 const height = 600;
-const count = 100;
 
 
-// create random data
 interface Point {
 	x: number;
 	y: number;
@@ -20,51 +20,70 @@ interface Point {
 	c: number;
 }
 
-const data: Point[] = [];
-let minX = Infinity;
-let minY = Infinity;
-let maxX = -Infinity;
-let maxY = -Infinity;
-for (let i = 0; i < count; i++) {
-	const x = Math.random() * 600;
-	const y = Math.random() * 400;
-	const r = Math.random() * 50;
-	const c = Math.floor(Math.random() * 3);
-	data[i] = { x, y, r, c };
-	minX = Math.min(minX, x - r);
-	minY = Math.min(minY, y - r);
-	maxX = Math.max(maxX, x + r);
-	maxY = Math.max(maxY, y + r);
-}
-console.log(`[original-demo] data generated, data.length = ${data.length}`);
 
-// create the svg element
-const svg = select('#main-container').append('svg')
-	.attr('width', width)
-	.attr('height', height)
-	.attr('viewBox', [0, 0, width, height])
-	.style('border', '1px solid black')
-	.on('click', handleClick);
+// create the svg element and a group to hold all the circles
 
-// create the group to hold all circles
+const svg = select('#main-container').append('svg');
 const g = svg.append('g');
 
 
-// map data onto graphical elements
-// see: https://github.com/d3/d3-selection#joining-data
-//      https://bost.ocks.org/mike/join/
-//      https://observablehq.com/@d3/selection-join
-const color = ['yellow', 'green', 'blue'];
-g.selectAll('circle')
-	.data(data)
-	.enter()
-	.append('circle')
-	.attr('id', (d, i) => `circle${i}`)
-	.attr('cx', d => d.x)
-	.attr('cy', d => d.y)
-	.attr('r', d => d.r)
-	.attr('fill', d => color[d.c])
-	.attr('stroke', 'black');
+let minX = 0;
+let minY = 0;
+let maxX = 0;
+let maxY = 0;
+const r = 0.3;
+
+
+function renderData(data: Point[]) {
+
+	minX = Math.min(...data.map(d => d.x));
+	minY = Math.min(...data.map(d => d.y));
+	maxX = Math.max(...data.map(d => d.x));
+	maxY = Math.max(...data.map(d => d.y));
+
+	// map data onto graphical elements
+	// see: https://github.com/d3/d3-selection#joining-data
+	//      https://bost.ocks.org/mike/join/
+	//      https://observablehq.com/@d3/selection-join
+
+	svg
+		.attr('width', width)
+		.attr('height', height)
+		.attr('viewBox', [minX - r, minY - r, maxX - minX + 2 * r, maxY - minY + 2 * r])
+		.style('border', '1px solid black')
+		.on('click', handleClick);
+
+	const color = ['yellow', 'green', 'blue'];
+	const circles = g.selectAll('circle').data(data);
+	// enter selection
+	circles.enter().append('circle')
+		.attr('id', (d, i) => `circle${i}`)
+		.attr('cx', d => d.x)
+		.attr('cy', d => d.y)
+		.attr('r', d => d.r)
+		.attr('fill', d => color[d.c])
+		.attr('stroke', 'black')
+		.attr('stroke-width', d => d.r)
+		.attr('cursor', 'pointer');
+}
+
+loadDataFromFile(txtFilePath)
+	.then((data) => {
+		console.log(`[original-demo] data loaded, data.length = ${data.length}`);
+
+		renderData(data.map(d => ({
+			x: d.x,
+			y: d.y,
+			r: r,
+			c: 0,
+		})));
+
+		resetZoom();
+
+	})
+	.catch((error) => {
+		console.error('Error reading file:', error);
+	});
 
 
 // selection
@@ -111,10 +130,6 @@ function handleClick(event: PointerEvent, d: Point) {
 // zoom and pan
 
 // calculate and set the initial transformation matrix
-const sceneWidth = maxX - minX;
-const sceneHeight = maxY - minY;
-const scale = Math.min(width / sceneWidth, height / sceneHeight);
-
 // see https://github.com/d3/d3-zoom#zoom
 const zoomExtent = zoom()
 	.scaleExtent([0.1, 10])
@@ -122,9 +137,11 @@ const zoomExtent = zoom()
 
 svg.call(zoomExtent);
 
-const resetZoom = () => svg.call(zoomExtent.transform, zoomIdentity.scale(scale).translate(-minX, -minY));
+const resetZoom = () => {
+	const initialTransform = zoomIdentity.translate(0, 0).scale(1);
+	svg.call(zoomExtent.transform, initialTransform);
+};
 
-resetZoom();
 
 const resetZoomBtn = document.getElementById('reset-zoom-btn') as HTMLButtonElement;
 
