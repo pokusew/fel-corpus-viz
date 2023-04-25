@@ -76,6 +76,20 @@ export default {
 					path.resolve(__dirname, 'app'),
 				],
 			},
+			// bundle .txt files from the app/data directory
+			// this is a temporary solution and will be replaced by a more robust file serving mechanism in the future
+			{
+				test: /\.txt$/,
+				// see https://webpack.js.org/guides/asset-modules/
+				type: 'asset/resource',
+				generator: {
+					// [ext] already contains the dot (.)
+					filename: '[name].[contenthash].imt[ext]',
+				},
+				include: [
+					path.resolve(__dirname, 'app/data'), // Update the include path to 'app/data'
+				],
+			},
 		],
 	},
 
