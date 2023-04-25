@@ -20,10 +20,6 @@
       <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
     </H2CodeStyleSettings>
-    <H2CodeStyleSettings version="6">
-      <option name="USE_GENERAL_STYLE" value="false" />
-      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
-    </H2CodeStyleSettings>
     <HSQLCodeStyleSettings version="6">
       <option name="USE_GENERAL_STYLE" value="false" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
