@@ -24,7 +24,7 @@ let minX = 0;
 let minY = 0;
 let maxX = 0;
 let maxY = 0;
-const docPointColor = "yellow";
+const docPointColor = 'yellow';
 const docPointRadius = 0.1;
 
 
