@@ -6,7 +6,7 @@ interface Position {
 	y: number;
 }
 
-interface Document {
+interface DatasetDocument {
 	id: number;
 	wordCounts: Map<string, number>;
 	position: Position;
@@ -14,7 +14,7 @@ interface Document {
 
 interface Dataset {
 	name: string;
-	documents: Document[];
+	documents: DatasetDocument[];
 	vocabSize: number;
 }
 
@@ -43,7 +43,7 @@ async function loadDataset(datasetInfo: DatasetInfo): Promise<Dataset> {
 
 	// load bags or words for documents
 
-	const documents: Document[] = [];
+	const documents: DatasetDocument[] = [];
 
 	for (const line of bowData.slice(3)) {
 		const [docId, wordId, wordCount] = line.split(' ').map(Number);
@@ -81,4 +81,4 @@ async function loadDatasetFile(path: string): Promise<string[]> {
 	}
 }
 
-export { loadDataset, Dataset, Document };
+export { loadDataset, Dataset, DatasetDocument };

@@ -1,5 +1,5 @@
 import { select } from 'd3-selection';
-import { Document } from './load-data';
+import { DatasetDocument } from './load-data';
 
 const popover = select('body')
 	.append('div')
@@ -12,7 +12,7 @@ const popover = select('body')
 	.style('border-radius', '5px');
 
 
-function showPopover(event: PointerEvent, doc: Document) {
+function showPopover(event: PointerEvent, doc: DatasetDocument) {
 	// Extract the top 3 words and their counts
 	const topWords = Array.from(doc.wordCounts.entries())
 		.sort((a, b) => b[1] - a[1])

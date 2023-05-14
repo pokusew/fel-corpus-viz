@@ -5,7 +5,7 @@ import { select } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
-import { loadDataset, Document } from './load-data';
+import { loadDataset, DatasetDocument } from './load-data';
 import { kos } from '../data/datasets';
 import { hidePopover, showPopover } from './popover';
 
@@ -29,7 +29,7 @@ const docPointRadius = 0.1;
 
 
 
-function renderData(data: Document[]) {
+function renderData(data: DatasetDocument[]) {
 
 	minX = Math.min(...data.map(d => d.position.x));
 	minY = Math.min(...data.map(d => d.position.y));
@@ -93,7 +93,7 @@ let selected: SVGCircleElement | null = null;
 // this function is added as a handler for the 'click' event on the svg element
 // thanks to the event propagation rules, every click to any nested element will also trigger this callback
 // unless the event is stopped from propagating further
-function handleClickSvgContainer(event: PointerEvent, point: Document) {
+function handleClickSvgContainer(event: PointerEvent, point: DatasetDocument) {
 
 	// always deselect the previously selected element
 	if (isDefined(selected)) {
@@ -104,7 +104,7 @@ function handleClickSvgContainer(event: PointerEvent, point: Document) {
 	hidePopover();
 }
 
-function handleClickDataPoint(event: PointerEvent, point: Document) {
+function handleClickDataPoint(event: PointerEvent, point: DatasetDocument) {
 	// do not bubble up to the svg
 	event.stopPropagation();
 	// select this circle
