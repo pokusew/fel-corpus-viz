@@ -1,37 +1,84 @@
+import { DatasetInfo } from '../data/datasets';
 
-interface DocumentEmbedding {
-	id: number;
+
+interface Position {
 	x: number;
 	y: number;
 }
 
-async function loadDataFromFile(path: string): Promise<DocumentEmbedding[]> {
-	try {
-		const response = await fetch(path);
-		const data = await response.text();
+interface Document {
+	id: number;
+	wordCounts: Map<string, number>;
+	position: Position;
+}
 
-		const lines = data.split('\n');
-		const documentEmbeddings: DocumentEmbedding[] = [];
+interface Dataset {
+	name: string;
+	documents: Document[];
+	vocabSize: number;
+}
 
-		for (const line of lines) {
-			if (line.trim() === '') {
-				continue;
-			}
 
-			const parts = line.split(' ').map(Number);
-			const documentEmbedding: DocumentEmbedding = {
-				id: parts[0],
-				x: parts[1],
-				y: parts[2],
+async function loadDataset(datasetInfo: DatasetInfo): Promise<Dataset> {
+
+	const {
+		embeddingsFile,
+		vocabFile,
+		bowFile,
+	} = datasetInfo;
+
+
+	const [embeddingsData, vocabulary, bowData] = await Promise.all([
+		loadDatasetFile(embeddingsFile),
+		loadDatasetFile(vocabFile),
+		loadDatasetFile(bowFile),
+	]);
+
+	// load preprocessed document embeddings
+	const docPositions: Position[] = [];
+	for (const line of embeddingsData) {
+		const parts = line.split(' ').map(Number);
+		docPositions.push({ x: parts[1], y: parts[2] });
+	}
+
+	// load bags or words for documents
+
+	const documents: Document[] = [];
+
+	for (const line of bowData.slice(3)) {
+		const [docId, wordId, wordCount] = line.split(' ').map(Number);
+		const docIdx = docId - 1;
+
+		// create a new entry for the current document
+		if (!documents[docIdx]) {
+			documents[docIdx] = {
+				id: Number(docId),
+				wordCounts: new Map<string, number>(),
+				position: docPositions[docIdx],
 			};
-
-			documentEmbeddings.push(documentEmbedding);
 		}
 
-		return documentEmbeddings;
+		// add the word count to the current document
+		const word = vocabulary[wordId - 1];
+		documents[docIdx].wordCounts.set(word, wordCount);
+	}
+
+	return {
+		name: datasetInfo.name,
+		documents,
+		vocabSize: vocabulary.length,
+	};
+}
+
+async function loadDatasetFile(path: string): Promise<string[]> {
+	try {
+		// const response = await fetch(`../data/${fileName}`);
+		const response = await fetch(path);
+		const data = await response.text();
+		return data.split('\n');
 	} catch (error) {
 		throw new Error(`Error fetching file: ${error}`);
 	}
 }
 
-export { loadDataFromFile, DocumentEmbedding };
+export { loadDataset, Dataset, Document };
