@@ -1,5 +1,4 @@
-import { DatasetInfo } from '../data/datasets';
-
+import { corpora, CorpusName, PreprocessingMethod, EmbeddingMethod } from './corpora';
 
 interface Position {
 	x: number;
@@ -12,27 +11,36 @@ interface DatasetDocument {
 	position: Position;
 }
 
-interface Dataset {
-	name: string;
+export interface DatasetDescriptor {
+	corpusName: CorpusName;
+	preprocessingMethod: PreprocessingMethod;
+	embeddingMethod: EmbeddingMethod;
+}
+
+interface Dataset extends DatasetDescriptor {
 	documents: DatasetDocument[];
 	vocabSize: number;
 }
 
-
-async function loadDataset(datasetInfo: DatasetInfo): Promise<Dataset> {
+async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Dataset> {
 
 	const {
-		embeddingsFile,
-		vocabFile,
-		bowFile,
-	} = datasetInfo;
+		corpusName,
+		preprocessingMethod,
+		embeddingMethod,
+	} = datasetDescriptor;
 
+	// retrieve the corresponding corpus files
+	const { vocabFile, docWordFile, embeddingFiles } = corpora[corpusName];
+	const embeddingsFile = embeddingFiles[preprocessingMethod][embeddingMethod];
 
-	const [embeddingsData, vocabulary, bowData] = await Promise.all([
-		loadDatasetFile(embeddingsFile),
+	const [embeddingsData, vocabulary, docWordData] = await Promise.all([
 		loadDatasetFile(vocabFile),
-		loadDatasetFile(bowFile),
+		loadDatasetFile(docWordFile),
+		loadDatasetFile(embeddingsFile),
 	]);
+
+	// load and preprocess the dataset data
 
 	// load preprocessed document embeddings
 	const docPositions: Position[] = [];
@@ -42,10 +50,9 @@ async function loadDataset(datasetInfo: DatasetInfo): Promise<Dataset> {
 	}
 
 	// load bags or words for documents
-
 	const documents: DatasetDocument[] = [];
 
-	for (const line of bowData.slice(3)) {
+	for (const line of docWordData.slice(3)) {
 		const [docId, wordId, wordCount] = line.split(' ').map(Number);
 		const docIdx = docId - 1;
 
@@ -64,7 +71,9 @@ async function loadDataset(datasetInfo: DatasetInfo): Promise<Dataset> {
 	}
 
 	return {
-		name: datasetInfo.name,
+		corpusName,
+		preprocessingMethod,
+		embeddingMethod,
 		documents,
 		vocabSize: vocabulary.length,
 	};

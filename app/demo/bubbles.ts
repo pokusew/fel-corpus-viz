@@ -5,9 +5,8 @@ import { select } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
-import { loadDataset, DatasetDocument } from './load-data';
-import { kos } from '../data/datasets';
 import { hidePopover, showPopover } from './popover';
+import { DatasetDescriptor, DatasetDocument, loadDataset } from './load-dataset';
 
 
 const width = 800;
@@ -28,7 +27,6 @@ let maxY = 0;
 const docPointColor = 'yellow';
 const docPointRadius = 0.1;
 const docStrokeWidth = 0.1;
-
 
 function renderData(data: DatasetDocument[]) {
 
@@ -81,7 +79,13 @@ function renderData(data: DatasetDocument[]) {
 }
 
 
-loadDataset(kos)
+const datasetDescriptor: DatasetDescriptor = {
+	corpusName: 'kos',
+	preprocessingMethod: 'bow',
+	embeddingMethod: 'pca',
+};
+
+loadDataset(datasetDescriptor)
 	.then((dataset) => {
 		console.log(`[original-demo] data loaded, datasetSize = ${dataset.documents.length}`);
 		renderData(dataset.documents);

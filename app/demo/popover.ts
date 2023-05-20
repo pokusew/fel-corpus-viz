@@ -1,5 +1,5 @@
 import { select } from 'd3-selection';
-import { DatasetDocument } from './load-data';
+import { DatasetDocument } from './load-dataset';
 
 const popover = select('body')
 	.append('div')
