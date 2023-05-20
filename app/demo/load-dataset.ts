@@ -30,12 +30,11 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 		embeddingMethod,
 	} = datasetDescriptor;
 
-	console.log("Loading dataset corpusName: ", corpusName, "preprocessingMethod: ", preprocessingMethod, "embeddingMethod: ", embeddingMethod);
 	// retrieve the corresponding corpus files
 	const { vocabFile, docWordFile, embeddingFiles } = corpora[corpusName];
 	const embeddingsFile = embeddingFiles[preprocessingMethod][embeddingMethod];
 
-	const [vocabulary, docWordData, embeddingsData] = await Promise.all([
+	const [embeddingsData, vocabulary, docWordData] = await Promise.all([
 		loadDatasetFile(vocabFile),
 		loadDatasetFile(docWordFile),
 		loadDatasetFile(embeddingsFile),
@@ -60,7 +59,7 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 		// create a new entry for the current document
 		if (!documents[docIdx]) {
 			documents[docIdx] = {
-				id: docId,
+				id: Number(docId),
 				wordCounts: new Map<string, number>(),
 				position: docPositions[docIdx],
 			};

@@ -26,6 +26,8 @@ let maxX = 0;
 let maxY = 0;
 const docPointColor = 'yellow';
 const docPointRadius = 0.1;
+
+
 const docStrokeWidth = 0.1;
 
 function renderData(data: DatasetDocument[]) {
