@@ -30,7 +30,7 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 		embeddingMethod,
 	} = datasetDescriptor;
 
-	console.log("corpusName: ", corpusName, "preprocessingMethod: ", preprocessingMethod, "embeddingMethod: ", embeddingMethod);
+	console.log("Loading dataset corpusName: ", corpusName, "preprocessingMethod: ", preprocessingMethod, "embeddingMethod: ", embeddingMethod);
 	// retrieve the corresponding corpus files
 	const { vocabFile, docWordFile, embeddingFiles } = corpora[corpusName];
 	const embeddingsFile = embeddingFiles[preprocessingMethod][embeddingMethod];
@@ -49,9 +49,6 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 		const parts = line.split(' ').map(Number);
 		docPositions.push({ x: parts[1], y: parts[2] });
 	}
-
-	console.log(docPositions);
-	console.log(embeddingsData.length);
 
 	// load bags or words for documents
 	const documents: DatasetDocument[] = [];
