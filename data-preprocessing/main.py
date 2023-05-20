@@ -1,6 +1,8 @@
 
 
 import argparse
+import itertools
+from functools import cached_property
 from pathlib import Path
 from typing import Optional
 
@@ -10,12 +12,14 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
 from embeddings import WordEmbeddings, load_glove_word_embeddings
+from pca import pca_transform
 
 
 DATA_DIR = Path.cwd() / "data"
+IMAGE_DIR = DATA_DIR / "images"
 
-if not DATA_DIR.exists():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+if not IMAGE_DIR.exists():
+    IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class Corpus:
@@ -26,6 +30,7 @@ class Corpus:
         self.num_docs = num_docs
         self.vocab_size = len(id_to_word)
         self.id_to_word = id_to_word
+        self.id_to_vocab_idx = {word_id: i for i, word_id in enumerate(id_to_word)}
         self.word_to_id = {word: i for i, word in id_to_word.items()}
 
         # doc_id -> word_id -> count
@@ -43,6 +48,36 @@ class Corpus:
     @property
     def doc_ids(self) -> list[int]:
         return list(self.doc_to_bow)
+
+    @cached_property
+    def idf_vector(self) -> np.ndarray:
+        """Compute the inverse document frequency for each word in the corpus"""
+        # compute the document frequency for each word
+        doc_freq = np.zeros(self.vocab_size, dtype=np.int32)
+        for doc_bow in self.doc_to_bow.values():
+            for word_id in doc_bow:
+                doc_freq[self.id_to_vocab_idx[word_id]] += 1
+
+        assert np.all(doc_freq > 0)
+
+        # compute the inverse document frequency
+        return np.log(self.num_docs / doc_freq)
+
+    @cached_property
+    def document_term_matrix(self) -> np.ndarray:
+        """Compute the document-term matrix for the corpus"""
+        # create the document-term matrix
+        dtm = np.zeros((self.num_docs, self.vocab_size), dtype=np.float32)
+        for doc_idx, doc_bow in enumerate(self):
+            for word_id, count in doc_bow.items():
+                word_idx = self.id_to_vocab_idx[word_id]
+                dtm[doc_idx, word_idx] = count
+        return dtm
+
+    @cached_property
+    def tfidf_matrix(self) -> np.ndarray:
+        """Compute the TF-IDF matrix for the corpus"""
+        return self.document_term_matrix * self.idf_vector
 
     def __len__(self):
         return self.num_docs
@@ -88,11 +123,19 @@ def load_corpus(corpus_name: str, vocabulary: Optional[set[str]] = None) -> Corp
         id_to_word = {i: word for i, word in id_to_word.items() if word in vocabulary}
         print(f"Filtered out {orig_vocab_size - len(id_to_word)}/{orig_vocab_size} words from the corpus vocabulary")
 
+    seen_word_ids = set()
     docs_data = []
     for line in lines:
         doc_id, word_id, count = map(int, line.split())
         if word_id in id_to_word:
             docs_data.append((doc_id, word_id, count))
+            seen_word_ids.add(word_id)
+
+    # in some corpora, the vocabulary contains words that are not present in any document
+    # e.g. [6149, 8416, 15618] in the enron corpus
+    # we filter out these words from the vocabulary
+    print(f"Filtered out {len(id_to_word) - len(seen_word_ids)}/{len(id_to_word)} words from the corpus vocabulary")
+    id_to_word = {i: word for i, word in id_to_word.items() if i in seen_word_ids}
 
     corpus = Corpus(corpus_name, num_docs, id_to_word, docs_data)
     print(f"Loaded corpus: {corpus}")
@@ -125,8 +168,9 @@ def scatter_plot(X: np.ndarray, y: np.ndarray, title: str, save: bool = False):
     plt.title(title)
     plt.scatter(X[:, 0], X[:, 1], c=y, cmap='tab10')
     if save:
-        plt.savefig(f"{title}.png")
-        print(f"Saved plot to {title}.png")
+        path = IMAGE_DIR / f"{title.replace(' ', '_')}.png"
+        plt.savefig(path)
+        print(f"Saved plot to {path}")
     else:
         plt.show()
 
@@ -148,29 +192,43 @@ def preprocess_using_glove_embeddings(embeddings: WordEmbeddings, corpus: Corpus
     return X
 
 
-def main(args: argparse.Namespace) -> None:
+def run_data_preprocessing(
+    corpus_name: str,
+    reduction_method: str,
+    preprocess_method: str,
+    glove_file: Optional[str] = None,
+    save_figure: bool = False,
+) -> None:
     """Run the main program"""
 
-    if args.preprocess == "glove":
-        word_embeddings = load_glove_word_embeddings(args.glove_file)
-        corpus = load_corpus(args.corpus_name, vocabulary=word_embeddings.words)
+    if preprocess_method == "glove":
+        word_embeddings = load_glove_word_embeddings(glove_file)
+        corpus = load_corpus(corpus_name, vocabulary=word_embeddings.words)
         print(f"Loaded {len(word_embeddings.words)} embeddings")
         X = preprocess_using_glove_embeddings(word_embeddings, corpus)
 
-    elif args.preprocess == "bow":
-        corpus = load_corpus(args.corpus_name)
-        X = np.zeros((len(corpus), len(corpus.vocabulary)))
-        for i, doc in enumerate(corpus):
-            for j, word_id in enumerate(corpus.id_to_word):
-                X[i][j] = doc.get(word_id, 0)
+    elif preprocess_method == "bow":
+        corpus = load_corpus(corpus_name)
+        X = corpus.document_term_matrix
+
+    elif preprocess_method == "tfidf":
+        corpus = load_corpus(corpus_name)
+
+        # note: we use a slightly different implementation than the one in sklearn that doesn't add 1 to the idf
+        # X = TfidfTransformer(norm=None).fit_transform(X).toarray()
+        X = corpus.tfidf_matrix
 
     else:
-        raise ValueError(f"Unknown preprocessing method: {args.preprocess}")
+        raise ValueError(f"Unknown preprocessing method: {preprocess_method}")
 
-    if args.method == "pca":
+    print(f"Preprocessed corpus using {preprocess_method} method")
+
+    if reduction_method == "pca":
+        # the sklearn implementation of PCA is much faster than ours because it uses randomized SVD
         X_emb = PCA(n_components=2).fit_transform(X)
+        # X_emb = pca_transform(X, num_components=2)
 
-    elif args.method == "tsne":
+    elif reduction_method == "tsne":
         X_emb = TSNE(
             n_components=2,
             learning_rate='auto',
@@ -179,10 +237,12 @@ def main(args: argparse.Namespace) -> None:
         ).fit_transform(X)
 
     else:
-        raise ValueError(f"Unknown method: {args.method}")
+        raise ValueError(f"Unknown method: {reduction_method}")
+
+    print(f"Reduced corpus using {reduction_method} method")
 
     save_document_embeddings(
-        file=DATA_DIR / f"doc_embeddings.{args.corpus_name}.txt",
+        file=DATA_DIR / f"embeddings.{preprocess_method}.{reduction_method}.{corpus_name}.txt",
         embeddings=X_emb,
         corpus=corpus
     )
@@ -190,19 +250,47 @@ def main(args: argparse.Namespace) -> None:
     scatter_plot(
         X=X_emb,
         y=np.zeros(len(corpus)),
-        title=f"{args.method.upper()} of {args.preprocess.upper()} embeddings ({args.corpus_name})",
-        save=args.save_figure,
+        title=f"[{corpus_name}] {reduction_method.upper()} embeddings of {preprocess_method.upper()} vectors",
+        save=save_figure,
     )
 
 
-if __name__ == "__main__":
-    """Usage: python3 main.py --corpus_name kos --preprocess bow --method pca --save_figure"""
+def main() -> None:
+    """
+    Usage examples:
+    $ python3 main.py --corpus_name kos --preprocess bow --method pca --save_figure
+    $ python3 main.py --corpus_name kos --all
+    """
+
     parser = argparse.ArgumentParser()
+    parser.add_argument("--all", action="store_true")
     parser.add_argument("--corpus_name", type=str, default="kos")
-    parser.add_argument("--preprocess", type=str, choices=["bow", "glove"], default="bow")
+    parser.add_argument("--preprocess", type=str, choices=["bow", "glove", "tfidf"], default="bow")
     parser.add_argument("--glove_file", type=str, default="glove.6B.100d.txt")
     parser.add_argument("--method", type=str, choices=["pca", "tsne"], default="pca")
     parser.add_argument("--save_figure", action="store_true")
 
     args = parser.parse_args()
-    main(args)
+
+    if args.all:
+        # we leave out glove preprocessing since it doesn't give good results
+        for reduction_method, preprocess_method in itertools.product(["pca", "tsne"], ["bow", "tfidf"]):
+            run_data_preprocessing(
+                corpus_name=args.corpus_name,
+                reduction_method=reduction_method,
+                preprocess_method=preprocess_method,
+                glove_file=args.glove_file,
+                save_figure=False,
+            )
+    else:
+        run_data_preprocessing(
+            corpus_name=args.corpus_name,
+            reduction_method=args.method,
+            preprocess_method=args.preprocess,
+            glove_file=args.glove_file,
+            save_figure=args.save_figure,
+        )
+
+
+if __name__ == "__main__":
+    main()
