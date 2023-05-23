@@ -4,9 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
 import { ScatterplotWrapper } from './scatterplot';
 import { InfoScreen } from './common';
-import {  loadDataset } from '../demo/load-dataset';
+import { loadDataset } from '../demo/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../demo/corpora';
 import { Dataset } from '../demo/types';
+import { WordCloudWrapper } from './wordcloud';
 
 
 export interface QueryOperationLoading {
@@ -62,6 +63,9 @@ const CorpusViz = () => {
 
 	const [datasetQuery, setDatasetQuery] = useState<QueryOperation<Dataset>>({ status: 'loading' });
 
+	// toggle manually to test wordcloud
+	const [showWordCloud, setShowWordCloud] = useState<boolean>(false);
+
 	const [corpusName, setCorpusName] = useState<CorpusName>("kos");
 	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>("bow");
 	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>("pca");
@@ -114,9 +118,15 @@ const CorpusViz = () => {
 				<InfoScreen status="error">Error: {datasetQuery.error}</InfoScreen>
 			)}
 			{datasetQuery.status === 'success' && (
-				<ScatterplotWrapper
-					data={datasetQuery.data.documents}
-				/>
+				showWordCloud ? (
+					<WordCloudWrapper
+						document={datasetQuery.data.documents[0]}
+					/>
+				) : (
+					<ScatterplotWrapper
+						data={datasetQuery.data.documents}
+					/>
+				)
 			)}
 			<div className="app-controls">
 				{datasetQuery.status === 'success' && (

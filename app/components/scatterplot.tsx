@@ -17,6 +17,7 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 
 import IconMinimizeLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/minimize-light.svg';
 import { DatasetDocument } from '../demo/types';
+import { ResetZoomButton } from './common';
 
 
 export class Scatterplot {
@@ -405,10 +406,7 @@ export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 			// onClick={() => setCount(prevCount => prevCount + 1)}
 		>
 			<div className="toolbar">
-				<button name="resetZoom" className="btn btn-sm" onClick={handleResetZoom}>
-					<IconMinimizeLight className="icon" aria-hidden={true} />
-					<span>Reset zoom</span>
-				</button>
+				<ResetZoomButton onClick={handleResetZoom}/>
 			</div>
 		</div>
 	);
