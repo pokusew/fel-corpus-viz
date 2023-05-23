@@ -4,7 +4,7 @@
 
 .app {
 	display: grid;
-	grid-template-rows: remy(50px) 1fr remy(100px);
+	grid-template-rows: remy(32px) 1fr remy(32px);
 	grid-template-columns: 1fr;
 	grid-template-areas:
 		"header"
@@ -24,9 +24,10 @@
 	}
 
 	.app-name {
-		font-size: 1.25rem;
+		font-size: 1rem;
 		align-self: center;
 		margin: 0 1rem 0 0;
+		font-weight: 500;
 	}
 
 	.app-navigation {
@@ -75,7 +76,7 @@
 
 					&.active {
 						color: $brand-primary;
-						border-bottom: 2px solid $brand-primary;
+						background-color: $state-info-bg;
 					}
 
 				}
@@ -107,6 +108,8 @@
 	background-color: $gray-lighter;
 	justify-content: center;
 	text-align: center;
+	padding: 0 1rem;
+	font-size: remy(14px);
 
 	p {
 		margin: 0;
