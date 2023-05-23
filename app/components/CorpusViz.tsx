@@ -1,11 +1,11 @@
 "use strict";
 
 import React, { useEffect, useState } from 'react';
-import { kos } from '../data/datasets';
-import { Dataset, loadDataset } from '../demo/load-data';
 import { getIntAndIncrement } from '../helpers/counter';
 import { ScatterplotWrapper } from './scatterplot';
 import { InfoScreen } from './common';
+import { Dataset, loadDataset } from '../demo/load-dataset';
+import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../demo/corpora';
 
 
 export interface QueryOperationLoading {
@@ -33,7 +33,7 @@ export const DatasetOverview = ({ dataset }: DatasetOverviewProps) => {
 
 	return (
 		<div className="dataset-overview">
-			<h1 className="dataset-name">{dataset.name}</h1>
+			<h1 className="dataset-name">{dataset.corpusName}</h1>
 			<div className="stats">
 				<div className="stats-value">
 					<div className="name">
@@ -61,6 +61,10 @@ const CorpusViz = () => {
 
 	const [datasetQuery, setDatasetQuery] = useState<QueryOperation<Dataset>>({ status: 'loading' });
 
+	const [corpusName, setCorpusName] = useState<CorpusName>("enron");
+	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>("bow");
+	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>("pca");
+
 	console.log(`[App] dataset query`, datasetQuery);
 
 	useEffect(() => {
@@ -71,7 +75,11 @@ const CorpusViz = () => {
 
 		let ignore = false;
 
-		loadDataset(kos)
+		loadDataset({
+			corpusName,
+			preprocessingMethod,
+			embeddingMethod,
+		})
 			.then((dataset) => {
 				if (ignore) {
 					console.log(`[App] effect ${debugId}: ignoring fetch result`);
@@ -94,7 +102,7 @@ const CorpusViz = () => {
 			ignore = true;
 		};
 
-	}, []);
+	}, [corpusName, preprocessingMethod, embeddingMethod]);
 
 	return (
 		<main className="app-content">
