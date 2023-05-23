@@ -16,7 +16,8 @@ const height = 600;
 
 // create the svg element and a group to hold all the circles
 
-const svg = select('#main-container').append('svg');
+const svg = select('#main-container').append('svg')
+	.attr('id', 'demo-scatterplot');
 const g = svg.append('g');
 
 
@@ -157,7 +158,7 @@ if (import.meta.webpackHot) {
 	// @ts-ignore
 	import.meta.webpackHot.dispose((data) => {
 		console.log(`[original-demo][HMR] cleanup`);
-		document.querySelector('#main-container svg')?.remove();
+		document.querySelector('#main-container #demo-scatterplot')?.remove();
 		resetZoomBtn.removeEventListener('click', handleResetZoomBtnClick);
 	});
 	// @ts-ignore
