@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
 import { ScatterplotWrapper } from './scatterplot';
 import { InfoScreen } from './common';
-import { Dataset, loadDataset } from '../demo/load-dataset';
+import {  loadDataset } from '../demo/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../demo/corpora';
+import { Dataset } from '../demo/types';
 
 
 export interface QueryOperationLoading {

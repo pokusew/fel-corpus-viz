@@ -13,7 +13,7 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 	const { vocabFile, docWordFile, embeddingFiles } = corpora[corpusName];
 	const embeddingsFile = embeddingFiles[preprocessingMethod][embeddingMethod];
 
-	const [embeddingsData, vocabulary, docWordData] = await Promise.all([
+	const [vocabulary, docWordData, embeddingsData] = await Promise.all([
 		loadDatasetFile(vocabFile),
 		loadDatasetFile(docWordFile),
 		loadDatasetFile(embeddingsFile),
@@ -38,7 +38,7 @@ async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Datase
 		// create a new entry for the current document
 		if (!documents[docIdx]) {
 			documents[docIdx] = {
-				id: Number(docId),
+				id: docId,
 				wordCounts: new Map<string, number>(),
 				position: docPositions[docIdx],
 			};

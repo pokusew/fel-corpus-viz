@@ -16,7 +16,7 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // import {} from 'd3-transition';
 
 import IconMinimizeLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/minimize-light.svg';
-import { DatasetDocument } from '../demo/load-dataset';
+import { DatasetDocument } from '../demo/types';
 
 
 export class Scatterplot {
