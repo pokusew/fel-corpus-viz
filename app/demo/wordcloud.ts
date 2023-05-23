@@ -1,4 +1,5 @@
 import { Position } from './types';
+import { scaleLinear } from 'd3-scale';
 
 
 const minFontSize = 15;
@@ -10,10 +11,15 @@ export function calculateFontSizes(wordCounts: Map<string, number>): Map<string,
 	const minCount = Math.min(...counts);
 	const maxCount = Math.max(...counts);
 
+	const mapping = scaleLinear()
+		.domain([minCount, maxCount])
+		.range([minFontSize, maxFontSize]);
+
 	// calculate the font size for each word
 	const wordSizes = new Map<string, number>();
 	wordCounts.forEach((count, word) => {
-		let fontSize = ((count - minCount) / (maxCount - minCount)) * (maxFontSize - minFontSize) + minFontSize;
+		// const fontSize = ((count - minCount) / (maxCount - minCount)) * (maxFontSize - minFontSize) + minFontSize;
+		const fontSize = mapping(count);
 		wordSizes.set(word, fontSize);
 	});
 
