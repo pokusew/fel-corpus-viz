@@ -7,7 +7,7 @@ import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
 import { hidePopover, showPopover } from './popover';
 import { loadDataset } from './load-dataset';
-import { calculateFontSizes, estimateTextSize, generateWordPositions } from './wordcloud';
+import { calculateFontSizes, generateWordCloudPositions } from './wordcloud';
 import { DatasetDescriptor, DatasetDocument } from './types';
 
 
@@ -43,26 +43,24 @@ function renderWordCloud(document: DatasetDocument) {
 		.style('border', '1px solid black');
 
 	const wordCounts = document.wordCounts;
-	const wordSizes = calculateFontSizes(wordCounts);
-	const wordPositions = generateWordPositions(wordSizes, width, height);
+	const wordFontSizes = calculateFontSizes(wordCounts);
+	const wordPositions = generateWordCloudPositions(wordFontSizes, width, height);
 
-	wordSizes.forEach((fontSize, word) => {
-		const { x, y } = wordPositions.get(word)!;
-		const estimatedSize = estimateTextSize(word, fontSize);
-
+	wordPositions.forEach((pos, word) => {
+		const fontSize = wordFontSizes.get(word)!;
 		gWordCloud
 			.append('text')
-			.attr('x', x)
+			.attr('x', pos.x)
 			// SVG text y position is at baseline, so we need to shift the text by its height
-			.attr('y', y + estimatedSize.height)
+			.attr('y', pos.y + pos.height)
 			.attr('font-size', `${fontSize}px`)
 			.text(word);
 
 		// add a rectangle around the word for debugging
-		// const estimatedSize = estimateSize(word, fontSize);
+		// const estimatedSize = estimateTextSize(word, fontSize);
 		// gWordCloud.append('rect')
-		//     .attr('x', x)
-		//     .attr('y', y)  // SVG text y position is at baseline
+		//     .attr('x', pos.x)
+		//     .attr('y', pos.y)  // SVG text y position is at baseline
 		//     .attr('width', estimatedSize.width)
 		//     .attr('height', estimatedSize.height)
 		//     .attr('fill', 'none')
@@ -133,7 +131,7 @@ loadDataset(datasetDescriptor)
 	.then((dataset) => {
 		console.log(`[original-demo] data loaded, datasetSize = ${dataset.documents.length}`);
 		renderData(dataset.documents);
-		renderWordCloud(dataset.documents[5]);
+		renderWordCloud(dataset.documents[0]);
 		resetZoom();
 	})
 	.catch((error) => {
