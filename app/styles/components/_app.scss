@@ -116,3 +116,53 @@
 	}
 
 }
+
+.app.app--full-page {
+
+	overflow: hidden;
+
+	.app-content {
+		overflow: hidden;
+		display: grid;
+		grid-template-rows: 1fr;
+		grid-template-columns: 1fr remy(300px);
+		grid-template-areas:
+		"viz controls";
+	}
+
+}
+
+.app-scatterplot {
+	grid-area: viz;
+}
+
+.app-controls {
+	grid-area: controls;
+}
+
+.dataset-overview {
+	padding: 0 1rem;
+
+	.dataset-name {
+		margin: .5rem 0;
+	}
+
+	.stats {
+
+
+		.stats-value {
+			display: flex;
+			margin: 0 0 1rem 0;
+
+			.name {
+				flex: 1;
+				opacity: .8;
+			}
+
+			.value {
+				font-weight: 500;
+			}
+		}
+	}
+
+}
