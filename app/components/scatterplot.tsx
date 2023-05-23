@@ -1,7 +1,6 @@
 "use strict";
 
 import React, { useEffect, useRef, useCallback, useState, MouseEventHandler } from 'react';
-import { DatasetDocument } from '../demo/load-data';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 
@@ -17,6 +16,7 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // import {} from 'd3-transition';
 
 import IconMinimizeLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/minimize-light.svg';
+import { DatasetDocument } from '../demo/load-dataset';
 
 
 export class Scatterplot {
@@ -94,7 +94,7 @@ export class Scatterplot {
 		this.yAxisGroup = this.svgSelection.append('g')
 			.attr('class', 'axis axis-y');
 
-		this.zoomBehavior = zoom()
+		this.zoomBehavior = zoom<SVGSVGElement, DatasetDocument>()
 			// TODO: make sure scaleExtent is big enough before final deployment
 			.scaleExtent([0.1, 10])
 			// TODO: consider disabling double click zoom (may be clashing with fast selection)
@@ -353,7 +353,7 @@ export interface ScatterplotWrapperProps {
 
 export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 
-	const wrapperElemRef = useRef(null);
+	const wrapperElemRef = useRef<HTMLDivElement | null>(null);
 	const plotRef = useRef<Scatterplot | null>(null);
 
 	// const [count, setCount] = useState<number>(0);

@@ -61,7 +61,7 @@ const CorpusViz = () => {
 
 	const [datasetQuery, setDatasetQuery] = useState<QueryOperation<Dataset>>({ status: 'loading' });
 
-	const [corpusName, setCorpusName] = useState<CorpusName>("enron");
+	const [corpusName, setCorpusName] = useState<CorpusName>("kos");
 	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>("bow");
 	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>("pca");
 
