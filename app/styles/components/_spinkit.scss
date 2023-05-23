@@ -3,10 +3,10 @@
 // source: https://github.com/tobiasahlin/SpinKit
 // --------------------------------------------------
 
-:root {
-	--sk-size: 40px;
-	--sk-color: #333;
-}
+//:root {
+//	--sk-size: 40px;
+//	--sk-color: #333;
+//}
 
 // Flow
 //
@@ -17,26 +17,33 @@
 // </div>
 
 .sk-flow {
-	width: calc(var(--sk-size) * 1.3);
-	height: calc(var(--sk-size) * 1.3);
+	width: remy(48px);
+	height: remy(48px);
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 }
 
 .sk-flow-dot {
 	width: 25%;
 	height: 25%;
-	background-color: var(--sk-color);
+	background-color: #333;
 	border-radius: 50%;
 	animation: sk-flow 1.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0s infinite both;
 }
 
 .sk-flow-dot:nth-child(1) {
+	background-color: $teal;
 	animation-delay: -0.30s;
 }
 
 .sk-flow-dot:nth-child(2) {
+	background-color: $pink;
 	animation-delay: -0.15s;
+}
+
+.sk-flow-dot:nth-child(3) {
+	background-color: $purple;
 }
 
 @keyframes sk-flow {
