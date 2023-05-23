@@ -103,7 +103,10 @@ export class Scatterplot {
 		this.svgSelection.call(this.zoomBehavior);
 
 		this.resizeObserver = new ResizeObserver(entries => {
-			if (entries.length < 1 || entries[0].target !== this.svgElem) {
+			if (entries.length < 1 || entries[0].target !== wrapperElem) {
+				IS_DEVELOPMENT && console.error(
+					`[ScatterplotD3][${this.debugId}] unexpected resizeObserver callback invocation`, entries,
+				);
 				return;
 			}
 			const entry = entries[0];
@@ -115,7 +118,17 @@ export class Scatterplot {
 
 		this.computeDataBounds();
 
-		this.resizeObserver.observe(this.svgElem);
+		// Note:
+		//   Observing svg elements seems to be not working in WebKit (Chrome works great)
+		//   This might be related to the special treatment svg has in the Resize Observer spec.
+		//   Here is a SO question that addresses it:
+		//     https://stackoverflow.com/questions/65565149/how-to-apply-resizeobserver-to-svg-element
+		//   Here is a possibly related GH issue with more context about the spec:
+		//     https://github.com/w3c/csswg-drafts/issues/4032
+		// So to overcome the current issue in WebKit, instead of observe the svgElem like this:
+		//   this.resizeObserver.observe(this.svgElem);
+		// we observe the wrapperElem which has the exact same size in our layout.
+		this.resizeObserver.observe(wrapperElem);
 
 		// we can actually omit (currently omitted) the following getBoundingClientRect() + updateSize() call
 		// as the resizeObserver callback is always invoked
