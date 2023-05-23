@@ -264,9 +264,7 @@ export class Scatterplot {
 				.attr('class', 'point')
 				.attr('id', d => `point-${d.id}`)
 				.attr('r', pointRadius),
-			update => update
-				.attr('cx', d => this.xScale(d.position.x))
-				.attr('cy', d => this.yScale(d.position.y)),
+			update => update,
 			exit => exit.remove(),
 		)
 			// the following will be performed for both enter and update
