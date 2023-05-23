@@ -6,11 +6,18 @@ import { select } from 'd3-selection';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
 import { hidePopover, showPopover } from './popover';
-import { DatasetDescriptor, DatasetDocument, loadDataset } from './load-dataset';
+import { loadDataset } from './load-dataset';
+import { calculateFontSizes, estimateTextSize, generateWordPositions } from './wordcloud';
+import { DatasetDescriptor, DatasetDocument } from './types';
 
 
 const width = 800;
 const height = 600;
+
+
+// Create a new SVG element for the word cloud
+const svgWordCloud = select('#main-container').append('svg');
+const gWordCloud = svgWordCloud.append('g');
 
 
 // create the svg element and a group to hold all the circles
@@ -26,9 +33,44 @@ let maxX = 0;
 let maxY = 0;
 const docPointColor = 'yellow';
 const docPointRadius = 0.1;
-
-
 const docStrokeWidth = 0.1;
+
+
+function renderWordCloud(document: DatasetDocument) {
+	svgWordCloud
+		.attr('width', width)
+		.attr('height', height)
+		.style('border', '1px solid black');
+
+	const wordCounts = document.wordCounts;
+	const wordSizes = calculateFontSizes(wordCounts);
+	const wordPositions = generateWordPositions(wordSizes, width, height);
+
+	wordSizes.forEach((fontSize, word) => {
+		const { x, y } = wordPositions.get(word)!;
+		const estimatedSize = estimateTextSize(word, fontSize);
+
+		gWordCloud
+			.append('text')
+			.attr('x', x)
+			// SVG text y position is at baseline, so we need to shift the text by its height
+			.attr('y', y + estimatedSize.height)
+			.attr('font-size', `${fontSize}px`)
+			.text(word);
+
+		// add a rectangle around the word for debugging
+		// const estimatedSize = estimateSize(word, fontSize);
+		// gWordCloud.append('rect')
+		//     .attr('x', x)
+		//     .attr('y', y)  // SVG text y position is at baseline
+		//     .attr('width', estimatedSize.width)
+		//     .attr('height', estimatedSize.height)
+		//     .attr('fill', 'none')
+		//     .attr('stroke', 'red');
+
+	});
+
+}
 
 function renderData(data: DatasetDocument[]) {
 
@@ -91,6 +133,7 @@ loadDataset(datasetDescriptor)
 	.then((dataset) => {
 		console.log(`[original-demo] data loaded, datasetSize = ${dataset.documents.length}`);
 		renderData(dataset.documents);
+		renderWordCloud(dataset.documents[5]);
 		resetZoom();
 	})
 	.catch((error) => {

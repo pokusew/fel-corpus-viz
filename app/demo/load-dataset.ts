@@ -1,26 +1,5 @@
-import { corpora, CorpusName, PreprocessingMethod, EmbeddingMethod } from './corpora';
-
-interface Position {
-	x: number;
-	y: number;
-}
-
-interface DatasetDocument {
-	id: number;
-	wordCounts: Map<string, number>;
-	position: Position;
-}
-
-export interface DatasetDescriptor {
-	corpusName: CorpusName;
-	preprocessingMethod: PreprocessingMethod;
-	embeddingMethod: EmbeddingMethod;
-}
-
-interface Dataset extends DatasetDescriptor {
-	documents: DatasetDocument[];
-	vocabSize: number;
-}
+import { corpora } from './corpora';
+import { Dataset, DatasetDescriptor, DatasetDocument, Position } from './types';
 
 async function loadDataset(datasetDescriptor: DatasetDescriptor): Promise<Dataset> {
 
@@ -90,4 +69,4 @@ async function loadDatasetFile(path: string): Promise<string[]> {
 	}
 }
 
-export { loadDataset, Dataset, DatasetDocument };
+export { loadDataset };
