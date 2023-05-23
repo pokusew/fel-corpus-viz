@@ -26,7 +26,7 @@ let maxX = 0;
 let maxY = 0;
 const docPointColor = 'yellow';
 const docPointRadius = 0.1;
-
+const docStrokeWidth = 0.1;
 
 
 function renderData(data: DatasetDocument[]) {
@@ -41,11 +41,17 @@ function renderData(data: DatasetDocument[]) {
 	//      https://bost.ocks.org/mike/join/
 	//      https://observablehq.com/@d3/selection-join
 
+	// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox
+	// min-x min-y width height
 	const viewBox = [
-		minX - docPointRadius,
-		minY - docPointRadius,
-		maxX - minX + 2 * docPointRadius,
-		maxY - minY + 2 * docPointRadius,
+		// min-x
+		minX - docPointRadius - docStrokeWidth / 2,
+		// min-y
+		minY - docPointRadius - docStrokeWidth / 2,
+		// width
+		maxX - minX + 2 * docPointRadius + docStrokeWidth,
+		// height
+		maxY - minY + 2 * docPointRadius + docStrokeWidth,
 	];
 	svg
 		.attr('width', width)
@@ -65,7 +71,7 @@ function renderData(data: DatasetDocument[]) {
 		.attr('r', docPointRadius)
 		.attr('fill', docPointColor)
 		.attr('stroke', 'black')
-		.attr('stroke-width', docPointRadius)
+		.attr('stroke-width', docStrokeWidth)
 		.attr('cursor', 'pointer')
 		.on('mouseover', showPopover)
 		// hide the popover when the mouse leaves the circle unless it was clicked on
