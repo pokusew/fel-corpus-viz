@@ -9,7 +9,7 @@
 	height: 100%;
 }
 
-.loading-screen {
+.info-screen {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -22,7 +22,24 @@
 	align-items: center;
 	justify-content: center;
 
-	.loading-screen-message {
-		margin: 0 0 2rem 0;
+	.message {
+		margin: 1rem 0 0 0;
+		font-size: remy(14px);
 	}
+
+	&.screen-error {
+		background-color: $state-danger-bg;
+		color: $state-danger-text;
+	}
+
+	&.screen-warning {
+		background-color: $state-warning-bg;
+		color: $state-warning-text;
+	}
+
+	&.screen-success {
+		background-color: $state-success-bg;
+		color: $state-success-text;
+	}
+
 }
