@@ -15,7 +15,7 @@
 	font-size: 1rem;
 	line-height: inherit;
 
-	&:hover, &:focus {
+	&:hover, &:focus-visible {
 		text-decoration: none;
 		appearance: none;
 		background-color: darken($gray-lighter, 10%);
@@ -44,7 +44,7 @@
 		background-color: $brand-primary;
 		color: $white;
 
-		&:hover, &:focus {
+		&:hover, &:focus-visible {
 			background-color: darken($brand-primary, 10%);
 			color: $white;
 		}
@@ -54,7 +54,7 @@
 		background-color: $brand-warning;
 		color: $white;
 
-		&:hover, &:focus {
+		&:hover, &:focus-visible {
 			background-color: darken($brand-warning, 10%);
 			color: $white;
 		}
@@ -64,7 +64,7 @@
 		background-color: $brand-danger;
 		color: $white;
 
-		&:hover, &:focus {
+		&:hover, &:focus-visible {
 			background-color: darken($brand-danger, 10%);
 			color: $white;
 		}
@@ -74,7 +74,7 @@
 		background-color: $brand-success;
 		color: $white;
 
-		&:hover, &:focus {
+		&:hover, &:focus-visible {
 			background-color: darken($brand-success, 10%);
 			color: $white;
 		}
