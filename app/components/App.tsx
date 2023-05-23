@@ -1,7 +1,7 @@
 "use strict";
 
-import React, { useCallback, useState } from 'react';
-import Demo from './Demo';
+import React from 'react';
+import CorpusViz from './CorpusViz';
 
 
 const App = () => {
@@ -32,19 +32,16 @@ const App = () => {
 
 			</header>
 
-			<main className="app-content">
-				<div className="container">
-					<Demo />
-				</div>
-			</main>
+			<CorpusViz />
 
 			<footer className="app-footer">
 				<p>
 					&copy; 2023 <a href="https://github.com/pokusew">Martin Endler</a>
 					{' and '}
 					<a href="https://github.com/borisrakovan">Boris Rakovan</a>
+					{' | '}
+					Source code on <a href="https://github.com/pokusew/fel-corpus-viz">GitHub</a>
 				</p>
-				<p>Source code on <a href="https://github.com/pokusew/fel-corpus-viz">GitHub</a></p>
 			</footer>
 
 		</>
