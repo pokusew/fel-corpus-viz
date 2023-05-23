@@ -122,3 +122,12 @@ ul, ol {
 	margin: 0 0 1rem 0;
 	padding: 0 0 0 2rem;
 }
+
+svg.icon {
+	display: block;
+	width: 16px;
+	height: 16px;
+	path {
+		fill: currentColor;
+	}
+}
