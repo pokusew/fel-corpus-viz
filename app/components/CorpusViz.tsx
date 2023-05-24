@@ -66,9 +66,9 @@ const CorpusViz = () => {
 	// toggle manually to test wordcloud
 	const [showWordCloud, setShowWordCloud] = useState<boolean>(false);
 
-	const [corpusName, setCorpusName] = useState<CorpusName>("kos");
-	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>("bow");
-	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>("pca");
+	const [corpusName, setCorpusName] = useState<CorpusName>('kos');
+	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>('bow');
+	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>('pca');
 
 	console.log(`[App] dataset query`, datasetQuery);
 

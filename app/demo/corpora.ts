@@ -13,11 +13,11 @@ import enronTfidfPca from '../data/embeddings.tfidf.pca.enron.txt';
 import enronTfidfTsne from '../data/embeddings.tfidf.tsne.enron.txt';
 
 
-export type CorpusName = "kos" | "enron";
+export type CorpusName = 'kos' | 'enron';
 
-export type PreprocessingMethod = "tfidf" | "bow";
+export type PreprocessingMethod = 'tfidf' | 'bow';
 
-export type EmbeddingMethod = "tsne" | "pca";
+export type EmbeddingMethod = 'tsne' | 'pca';
 
 export interface CorpusFiles {
 	vocabFile: string;
