@@ -77,7 +77,7 @@ export const WordcloudView = ({ params, onClose, selectedWords, onSelectedWordsC
 
 	const documents = params.documents;
 
-	const [allWords, commonWords]: [SelectedWords] = useMemo(() => {
+	const [allWords, commonWords]: [SelectedWords, SelectedWords] = useMemo(() => {
 
 		const allWords = new Set<string>();
 		const commonWords = new Set<string>();
