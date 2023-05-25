@@ -205,18 +205,21 @@ const CorpusViz = () => {
 		setDatasetQuery({ status: 'loading' });
 		setCorpusName(newCorpusName);
 		setSelectedPoints(new Set());
+		setSelectedWords(new Set());
 	}, []);
 
 	const handlePreprocessingMethodChange = useCallback((newPreprocessingMethod: PreprocessingMethod) => {
 		setDatasetQuery({ status: 'loading' });
 		setPreprocessingMethod(newPreprocessingMethod);
-		setSelectedPoints(new Set());
+		// setSelectedPoints(new Set());
+		// setSelectedWords(new Set());
 	}, []);
 
 	const handleEmbeddingMethodChange = useCallback((newEmbeddingMethod: EmbeddingMethod) => {
 		setDatasetQuery({ status: 'loading' });
 		setEmbeddingMethod(newEmbeddingMethod);
-		setSelectedPoints(new Set());
+		// setSelectedPoints(new Set());
+		// setSelectedWords(new Set());
 	}, []);
 
 	const [datasetQuery, setDatasetQuery] = useState<QueryOperation<Dataset>>({ status: 'loading' });
