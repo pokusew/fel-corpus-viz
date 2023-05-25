@@ -5,7 +5,7 @@ import { select } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
-import { hidePopover, showPopover } from './popover';
+import { createPopover } from './popover';
 import { loadDataset } from './load-dataset';
 import { calculateFontSizes, generateWordCloudPositions } from './wordcloud';
 import { DatasetDescriptor, DatasetDocument } from './types';
@@ -19,6 +19,7 @@ const height = 600;
 const svgWordCloud = select('#main-container').append('svg');
 const gWordCloud = svgWordCloud.append('g');
 
+const popover = createPopover(document.querySelector('body')!);
 
 // create the svg element and a group to hold all the circles
 
@@ -114,9 +115,13 @@ function renderData(data: DatasetDocument[]) {
 		.attr('stroke', 'black')
 		.attr('stroke-width', docStrokeWidth)
 		.attr('cursor', 'pointer')
-		.on('mouseover', showPopover)
+		.on('mouseover', popover.showPopover)
 		// hide the popover when the mouse leaves the circle unless it was clicked on
-		.on('mouseout', (event, point) => selected !== event.target ? hidePopover() : null)
+		.on('mouseout', (event, point) => {
+			if (selected !== event.target) {
+				popover.hidePopover();
+			}
+		})
 		.on('click', handleClickDataPoint);
 }
 
@@ -155,7 +160,7 @@ function handleClickSvgContainer(event: PointerEvent, point: DatasetDocument) {
 		selected = null;
 	}
 	// hide popover when clicking somewhere within the svg container
-	hidePopover();
+	popover.hidePopover();
 }
 
 function handleClickDataPoint(event: PointerEvent, point: DatasetDocument) {
@@ -165,7 +170,7 @@ function handleClickDataPoint(event: PointerEvent, point: DatasetDocument) {
 	selected = event.target as SVGCircleElement;
 	selected.setAttribute('stroke', 'red');
 	// show popover
-	showPopover(event, point);
+	popover.showPopover(event, point);
 }
 
 // zoom and pan
@@ -207,6 +212,7 @@ if (import.meta.webpackHot) {
 		console.log(`[original-demo][HMR] cleanup`);
 		document.querySelector('#main-container #demo-scatterplot')?.remove();
 		resetZoomBtn.removeEventListener('click', handleResetZoomBtnClick);
+		popover.destroy();
 	});
 	// @ts-ignore
 	import.meta.webpackHot.accept();

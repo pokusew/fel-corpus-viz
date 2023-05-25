@@ -26,7 +26,7 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 
 import { DatasetDocument } from '../demo/types';
 import { ResetZoomButton } from './common';
-import { hidePopover, showPopover } from '../demo/popover';
+import { createPopover, PopoverController } from '../demo/popover';
 
 
 export type SelectedPoints = Set<number>;
@@ -37,6 +37,7 @@ export class Scatterplot {
 	private readonly debugId: number;
 
 	private svgElem: SVGSVGElement;
+	private popover: PopoverController;
 	private data: DatasetDocument[];
 
 	private selectedPointsChangeHandler: ((points: SelectedPoints) => void) | undefined;
@@ -157,6 +158,8 @@ export class Scatterplot {
 		this.svgElem = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		this.svgElem.classList.add('scatterplot');
 		wrapperElem.append(this.svgElem);
+
+		this.popover = createPopover(document.querySelector('body')!);
 
 		this.svgSelection = select(this.svgElem);
 
@@ -445,9 +448,9 @@ export class Scatterplot {
 				.attr('class', 'point')
 				.attr('id', d => `point-${d.id}`)
 				.attr('r', pointRadius)
-				.on('mouseover', showPopover)
+				.on('mouseover', this.popover.showPopover)
 				// hide the popover when the mouse leaves the circle
-				.on('mouseout', hidePopover),
+				.on('mouseout', this.popover.hidePopover),
 			update => update,
 			exit => exit.remove(),
 		)
@@ -491,7 +494,6 @@ export class Scatterplot {
 			if (this.selectedPoints.has(d.id)) {
 				// deselect the point
 				event.target.classList.remove('selected');
-				hidePopover();
 				this.selectedPoints.delete(d.id);
 			} else {
 				// select the point
@@ -508,7 +510,6 @@ export class Scatterplot {
 		if (this.selectedPoints.size > 0) {
 			this.dataGroup.selectAll('.selected')
 				.classed('selected', false);
-			hidePopover();
 			this.selectedPoints.clear();
 			this.onSelectedPointsChange();
 		}
@@ -561,6 +562,8 @@ export class Scatterplot {
 		// and all registered callbacks (both for the svg element and its child elements)
 		// which should be free for later automatic GC (garbage collection)
 		this.svgElem.remove();
+		// also destroy the popover
+		this.popover.destroy();
 	}
 
 }
