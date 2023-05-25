@@ -419,7 +419,7 @@ export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 			// onClick={() => setCount(prevCount => prevCount + 1)}
 		>
 			<div className="toolbar">
-				<ResetZoomButton onClick={handleResetZoom}/>
+				<ResetZoomButton onClick={handleResetZoom} />
 			</div>
 		</div>
 	);
