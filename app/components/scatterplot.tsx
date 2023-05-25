@@ -107,6 +107,9 @@ export class Scatterplot {
 		this.dataGroup.selectAll('.point')
 			.data(this.data)
 			.classed('filtered', (d) => {
+				if (this.selectedWordsImmutable.size === 0) {
+					return false;
+				}
 				for (const w of this.selectedWordsImmutable) {
 					if (!d.wordCounts.has(w)) {
 						return false;
