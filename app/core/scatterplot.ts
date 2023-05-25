@@ -516,8 +516,11 @@ export class Scatterplot {
 		this.computeDataBounds();
 		this.updateScalesDomains();
 
-		this.selectedPoints = new Set();
-		this.selectedPointsImmutable = new Set();
+		// In order to play well with the declarative way we use it,
+		// the caller of setData() is supposed to call setSelectedPoints() themselves,
+		// if the current selection is incompatible with the new data.
+		// this.selectedPoints = new Set();
+		// this.selectedPointsImmutable = new Set();
 
 		// only attempt to render if the size has already been initialized
 		// the size is initialized in updateSize() which also call
