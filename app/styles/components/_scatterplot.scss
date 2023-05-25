@@ -41,6 +41,10 @@ svg.scatterplot,svg.wordcloud {
 			fill: orange;
 		}
 
+		&.common {
+			fill: green;
+		}
+
 		&.selected {
 			fill: red;
 		}

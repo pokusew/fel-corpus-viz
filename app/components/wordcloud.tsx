@@ -49,6 +49,8 @@ export class WordCloud {
 	private selectedWords: Set<string> = new Set<string>();
 	private selectedWordsImmutable: SelectedWords = new Set<string>();
 
+	private commonWordsImmutable: SelectedWords = new Set<string>();
+
 	constructor(wrapperElem: HTMLElement, debugId?: number) {
 
 		this.debugId = debugId ?? getIntAndIncrement('WordCloud');
@@ -78,6 +80,18 @@ export class WordCloud {
 
 	}
 
+	public setCommonWords(points: SelectedWords) {
+
+		if (this.commonWordsImmutable === points) {
+			return;
+		}
+
+		this.commonWordsImmutable = points;
+
+		this.mapCommonWordsToElements();
+
+	}
+
 	private mapSelectedWordsToElements() {
 
 		IS_DEVELOPMENT && console.log(
@@ -88,6 +102,18 @@ export class WordCloud {
 		this.dataGroup.selectAll('.word')
 			.data(this.data)
 			.classed('selected', (d) => this.selectedWords.has(d.word));
+	}
+
+	private mapCommonWordsToElements() {
+
+		IS_DEVELOPMENT && console.log(
+			`[WordCloudD3][${this.debugId}] mapCommonWordsToElements`, this.commonWordsImmutable,
+		);
+
+		// TODO: maybe there is a more effective way
+		this.dataGroup.selectAll('.word')
+			.data(this.data)
+			.classed('common', (d) => this.commonWordsImmutable.has(d.word));
 	}
 
 	public setData(doc: DatasetDocument | undefined) {
@@ -262,6 +288,7 @@ export interface WordCloudWrapperProps {
 	document: DatasetDocument;
 	onSelectedWordsChange: (points: SelectedWords) => void;
 	selectedWords: SelectedWords;
+	commonWords: SelectedWords;
 }
 
 export const WordCloudWrapper = forwardRef((
@@ -269,6 +296,7 @@ export const WordCloudWrapper = forwardRef((
 		document,
 		onSelectedWordsChange,
 		selectedWords,
+		commonWords,
 	}: WordCloudWrapperProps,
 	ref,
 ) => {
@@ -375,6 +403,16 @@ export const WordCloudWrapper = forwardRef((
 		plotRef.current.setSelectedWords(selectedWords);
 
 	}, [selectedWords]);
+
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof WordCloud)) {
+			return;
+		}
+
+		plotRef.current.setCommonWords(commonWords);
+
+	}, [commonWords]);
 
 	return (
 		<div

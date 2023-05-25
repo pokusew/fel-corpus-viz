@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { ChangeEventHandler, useCallback, useEffect, useId, useRef, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
 import { Scatterplot, ScatterplotWrapper, SelectedPoints, SelectedWords } from './scatterplot';
 import { InfoScreen } from './common';
@@ -74,6 +74,36 @@ export interface WordcloudViewProps {
 
 export const WordcloudView = ({ params, onClose, selectedWords, onSelectedWordsChange }: WordcloudViewProps) => {
 
+	const documents = params.documents;
+
+	const [allWords, commonWords]: [SelectedWords] = useMemo(() => {
+
+		const allWords = new Set<string>();
+		const commonWords = new Set<string>();
+
+		documents.forEach(doc => {
+			for (const w of doc.wordCounts.keys()) {
+				allWords.add(w);
+				let isCommon = true;
+				for (const otherDoc of documents) {
+					if (otherDoc === doc) {
+						continue;
+					}
+					if (!otherDoc.wordCounts.has(w)) {
+						isCommon = false;
+						break;
+					}
+				}
+				if (isCommon) {
+					commonWords.add(w);
+				}
+			}
+		});
+
+		return [allWords, commonWords];
+
+	}, [documents]);
+
 	return (
 		<div className="wordcloud-view">
 			<div className="wordcloud-view-header">
@@ -89,22 +119,31 @@ export const WordcloudView = ({ params, onClose, selectedWords, onSelectedWordsC
 				<div className="stats">
 					<div className="stats-value">
 						<div className="name">
+							num all words
+						</div>
+						<div className="value">
+							{allWords.size}
+						</div>
+					</div>
+					<div className="stats-value">
+						<div className="name">
 							num common words
 						</div>
 						<div className="value">
-							TODO
+							{commonWords.size}
 						</div>
 					</div>
 				</div>
 			</div>
 			<div className="wordcloud-view-container">
-				{params.documents.map(doc => (
+				{documents.map(doc => (
 					<div className="document-wrapper">
 						<DocumentOverview document={doc} />
 						<WordCloudWrapper
 							document={doc}
 							onSelectedWordsChange={onSelectedWordsChange}
 							selectedWords={selectedWords}
+							commonWords={commonWords}
 						/>
 					</div>
 				))}
@@ -461,40 +500,40 @@ const CorpusViz = () => {
 									<span className="sr-only">Compare selection</span>
 									<span>Compare</span>
 								</button>
-								<button
-									type="button"
-									className="btn"
-									onClick={(event) => {
-										event.preventDefault();
-										if (datasetQuery.status !== 'success') {
-											return;
-										}
-										setWordcloudViewParams({
-											mode: 'intersection',
-											documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),
-										});
-									}}
-								>
-									<CirclesOverlapRegular className="icon" aria-hidden={true} />
-									<span className="sr-only">Show intersection</span>
-								</button>
-								<button
-									type="button"
-									className="btn"
-									onClick={(event) => {
-										event.preventDefault();
-										if (datasetQuery.status !== 'success') {
-											return;
-										}
-										setWordcloudViewParams({
-											mode: 'union',
-											documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),
-										});
-									}}
-								>
-									<ObjectUnionSolidLight className="icon" aria-hidden={true} />
-									<span className="sr-only">Show union</span>
-								</button>
+								{/*<button*/}
+								{/*	type="button"*/}
+								{/*	className="btn"*/}
+								{/*	onClick={(event) => {*/}
+								{/*		event.preventDefault();*/}
+								{/*		if (datasetQuery.status !== 'success') {*/}
+								{/*			return;*/}
+								{/*		}*/}
+								{/*		setWordcloudViewParams({*/}
+								{/*			mode: 'intersection',*/}
+								{/*			documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),*/}
+								{/*		});*/}
+								{/*	}}*/}
+								{/*>*/}
+								{/*	<CirclesOverlapRegular className="icon" aria-hidden={true} />*/}
+								{/*	<span className="sr-only">Show intersection</span>*/}
+								{/*</button>*/}
+								{/*<button*/}
+								{/*	type="button"*/}
+								{/*	className="btn"*/}
+								{/*	onClick={(event) => {*/}
+								{/*		event.preventDefault();*/}
+								{/*		if (datasetQuery.status !== 'success') {*/}
+								{/*			return;*/}
+								{/*		}*/}
+								{/*		setWordcloudViewParams({*/}
+								{/*			mode: 'union',*/}
+								{/*			documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),*/}
+								{/*		});*/}
+								{/*	}}*/}
+								{/*>*/}
+								{/*	<ObjectUnionSolidLight className="icon" aria-hidden={true} />*/}
+								{/*	<span className="sr-only">Show union</span>*/}
+								{/*</button>*/}
 							</div>
 						</div>
 						<div className="controls-section">
