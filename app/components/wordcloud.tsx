@@ -7,7 +7,7 @@ import { BaseType, select, Selection } from 'd3-selection';
 import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from 'd3-zoom';
 
 import { DatasetDocument } from '../core/types';
-import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../core/wordcloud';
+import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../core/wordle';
 import { SelectedWords } from './scatterplot';
 
 

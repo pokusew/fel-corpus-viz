@@ -7,7 +7,7 @@ import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
 import { createPopover } from '../core/popover';
 import { loadDataset } from '../core/load-dataset';
-import { calculateFontSizes, generateWordCloudPositions } from '../core/wordcloud';
+import { calculateFontSizes, generateWordCloudPositions } from '../core/wordle';
 import { DatasetDescriptor, DatasetDocument } from '../core/types';
 
 
