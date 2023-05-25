@@ -1,13 +1,19 @@
-import React, { ChangeEventHandler, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { getIntAndIncrement } from '../helpers/counter';
-import { Scatterplot } from '../core/scatterplot';
-import { InfoScreen } from './common';
-import { loadDataset } from '../core/load-dataset';
-import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../core/corpora';
-import { Dataset, DatasetDocument, SelectedPoints, SelectedWords } from '../core/types';
-import ScatterplotWrapper from './ScatterplotWrapper';
-import WordCloudWrapper from './WordCloudWrapper';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+
 import { IS_DEVELOPMENT } from '../helpers/common';
+import { getIntAndIncrement } from '../helpers/counter';
+
+import { Dataset, SelectedPoints, SelectedWords } from '../core/types';
+import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../core/corpora';
+import { loadDataset } from '../core/load-dataset';
+import { Scatterplot } from '../core/scatterplot';
+
+import { InfoScreen } from './common';
+import WordCloudView, { WordCloudViewParams } from './WordCloudView';
+import DatasetOverview from './DatasetOverview';
+import DatasetSelector from './DatasetSelector';
+import ScatterplotWrapper from './ScatterplotWrapper';
+
 import IconXmarkLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/xmark-light.svg';
 import ObjectUnionSolidLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/object-union-solid.svg';
 import CirclesOverlapRegular
@@ -35,269 +41,6 @@ export interface QueryOperationError {
 
 export type QueryOperation<T> = QueryOperationLoading | QueryOperationSuccess<T> | QueryOperationError;
 
-
-export interface DocumentOverviewProps {
-	document: DatasetDocument;
-}
-
-export const DocumentOverview = ({ document }: DocumentOverviewProps) => {
-
-	return (
-		<div className="document-overview">
-			<h2 className="document-name">#{document.id}</h2>
-			<div className="stats">
-				<div className="stats-value">
-					<div className="name">
-						num unique words
-					</div>
-					<div className="value">
-						{document.wordCounts.size}
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-};
-
-export interface WordcloudViewParams {
-	mode: 'compare' | 'union' | 'intersection';
-	documents: DatasetDocument[];
-}
-
-export interface WordcloudViewProps {
-	params: WordcloudViewParams;
-	onClose: () => void;
-	selectedWords: SelectedWords;
-	onSelectedWordsChange: (words: SelectedWords) => void;
-}
-
-export const WordcloudView = ({ params, onClose, selectedWords, onSelectedWordsChange }: WordcloudViewProps) => {
-
-	const documents = params.documents;
-
-	const [allWords, commonWords]: [SelectedWords, SelectedWords] = useMemo(() => {
-
-		const allWords = new Set<string>();
-		const commonWords = new Set<string>();
-
-		documents.forEach(doc => {
-			for (const w of doc.wordCounts.keys()) {
-				allWords.add(w);
-				let isCommon = true;
-				for (const otherDoc of documents) {
-					if (otherDoc === doc) {
-						continue;
-					}
-					if (!otherDoc.wordCounts.has(w)) {
-						isCommon = false;
-						break;
-					}
-				}
-				if (isCommon) {
-					commonWords.add(w);
-				}
-			}
-		});
-
-		return [allWords, commonWords];
-
-	}, [documents]);
-
-	return (
-		<div className="wordcloud-view">
-			<div className="wordcloud-view-header">
-				<button
-					type="button"
-					className="btn btn-danger close-btn"
-					onClick={onClose}
-				>
-					<IconXmarkLight className="icon" aria-hidden={true} />
-					<span className="sr-only">Close</span>
-				</button>
-				<h1>{params.mode[0].toUpperCase()}{params.mode.slice(1)}</h1>
-				<div className="stats">
-					<div className="stats-value">
-						<div className="name">
-							num all words
-						</div>
-						<div className="value">
-							{allWords.size}
-						</div>
-					</div>
-					<div className="stats-value">
-						<div className="name">
-							num common words
-						</div>
-						<div className="value">
-							{commonWords.size}
-						</div>
-					</div>
-				</div>
-			</div>
-			<div className="wordcloud-view-container">
-				{documents.map(doc => (
-					<div className="document-wrapper">
-						<DocumentOverview document={doc} />
-						<WordCloudWrapper
-							document={doc}
-							onSelectedWordsChange={onSelectedWordsChange}
-							selectedWords={selectedWords}
-							commonWords={commonWords}
-						/>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-
-};
-
-
-export interface DatasetOverviewProps {
-	dataset: Dataset;
-}
-
-export const DatasetOverview = ({ dataset }: DatasetOverviewProps) => {
-
-	return (
-		<div className="dataset-overview">
-			<h1 className="dataset-name">{dataset.corpusName}</h1>
-			<div className="stats">
-				<div className="stats-value">
-					<div className="name">
-						num words in vocabulary
-					</div>
-					<div className="value">
-						{dataset.vocabSize}
-					</div>
-				</div>
-				<div className="stats-value">
-					<div className="name">
-						num docs
-					</div>
-					<div className="value">
-						{dataset.documents.length}
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-
-};
-
-
-export interface DatasetSelectorProps {
-	corpusName: CorpusName;
-	preprocessingMethod: PreprocessingMethod;
-	embeddingMethod: EmbeddingMethod;
-	onCorpusNameChange: (corpusName: CorpusName) => void;
-	onPreprocessingMethodChange: (preprocessingMethod: PreprocessingMethod) => void;
-	onEmbeddingMethodChange: (embeddingMethod: EmbeddingMethod) => void;
-}
-
-const corporaNames: CorpusName[] = ['kos', 'enron'];
-const preprocessingMethods: PreprocessingMethod[] = ['tfidf', 'bow'];
-const embeddingMethods: EmbeddingMethod[] = ['pca', 'tsne'];
-
-export const DatasetSelector = (
-	{
-		corpusName,
-		preprocessingMethod,
-		embeddingMethod,
-		onCorpusNameChange,
-		onPreprocessingMethodChange,
-		onEmbeddingMethodChange,
-	}: DatasetSelectorProps,
-) => {
-
-	const formId = useId();
-
-	const handleCorpusNameChange = useCallback<ChangeEventHandler<HTMLSelectElement>>((event) => {
-		if (corporaNames.includes(event.target.value as CorpusName)) {
-			onCorpusNameChange(event.target.value as CorpusName);
-		}
-	}, [onCorpusNameChange]);
-
-	const handlePreprocessingMethodChange = useCallback<ChangeEventHandler<HTMLSelectElement>>((event) => {
-		if (preprocessingMethods.includes(event.target.value as PreprocessingMethod)) {
-			onPreprocessingMethodChange(event.target.value as PreprocessingMethod);
-		}
-	}, [onPreprocessingMethodChange]);
-
-	const handleEmbeddingMethodChange = useCallback<ChangeEventHandler<HTMLSelectElement>>((event) => {
-		if (embeddingMethods.includes(event.target.value as EmbeddingMethod)) {
-			onEmbeddingMethodChange(event.target.value as EmbeddingMethod);
-		}
-	}, [onEmbeddingMethodChange]);
-
-	return (
-		<form className="dataset-selector">
-
-
-			<label
-				className="form-control-label"
-				htmlFor={`${formId}-corpusName`}
-			>
-				Corpus name:
-			</label>
-			<select
-				className="form-control"
-				id={`${formId}-corpusName`}
-				name="corpusName"
-				value={corpusName}
-				onChange={handleCorpusNameChange}
-			>
-				{corporaNames.map(name => (
-					<option key={name} value={name}>{name}</option>
-				))}
-			</select>
-
-
-			<label
-				className="form-control-label"
-				htmlFor={`${formId}-preprocessingMethod`}
-			>
-				Preprocessing method:
-			</label>
-			<select
-				className="form-control"
-				id={`${formId}-preprocessingMethod`}
-				name="preprocessingMethod"
-				value={preprocessingMethod}
-				onChange={handlePreprocessingMethodChange}
-			>
-				{preprocessingMethods.map(name => (
-					<option key={name} value={name}>{name}</option>
-				))}
-			</select>
-
-
-			<label
-				className="form-control-label"
-				htmlFor={`${formId}-embeddingMethod`}
-			>
-				Embedding method:
-			</label>
-			<select
-				className="form-control"
-				id={`${formId}-embeddingMethod`}
-				name="embeddingMethod"
-				value={embeddingMethod}
-				onChange={handleEmbeddingMethodChange}
-			>
-				{embeddingMethods.map(name => (
-					<option key={name} value={name}>{name}</option>
-				))}
-			</select>
-
-
-		</form>
-	);
-
-};
-
-
 const CorpusViz = () => {
 
 	const [corpusName, setCorpusName] = useState<CorpusName>('kos');
@@ -319,7 +62,7 @@ const CorpusViz = () => {
 		setSelectedWords(newSelectedWords);
 	}, []);
 
-	const [wordcloudViewParams, setWordcloudViewParams] = useState<WordcloudViewParams | null>(null);
+	const [wordcloudViewParams, setWordcloudViewParams] = useState<WordCloudViewParams | null>(null);
 
 	const handleWordcloudViewClose = useCallback(() => {
 		setWordcloudViewParams(null);
@@ -406,7 +149,7 @@ const CorpusViz = () => {
 				selectedWords={selectedWords}
 			/>
 			{wordcloudViewParams !== null && (
-				<WordcloudView
+				<WordCloudView
 					params={wordcloudViewParams}
 					onClose={handleWordcloudViewClose}
 					onSelectedWordsChange={handleSelectedWordsChange}
