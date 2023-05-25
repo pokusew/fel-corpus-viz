@@ -22,9 +22,6 @@ const App = () => {
 							<li>
 								<a className="active" href="/">Home</a>
 							</li>
-							<li>
-								<a href="/another.html">Page without React</a>
-							</li>
 						</ul>
 					</nav>
 
