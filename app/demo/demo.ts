@@ -5,10 +5,10 @@ import { select } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, zoomIdentity } from 'd3-zoom';
 import { isDefined } from '../helpers/common';
-import { createPopover } from './popover';
-import { loadDataset } from './load-dataset';
-import { calculateFontSizes, generateWordCloudPositions } from './wordcloud';
-import { DatasetDescriptor, DatasetDocument } from './types';
+import { createPopover } from '../core/popover';
+import { loadDataset } from '../core/load-dataset';
+import { calculateFontSizes, generateWordCloudPositions } from '../core/wordcloud';
+import { DatasetDescriptor, DatasetDocument } from '../core/types';
 
 
 const width = 800;

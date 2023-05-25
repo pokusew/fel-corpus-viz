@@ -24,9 +24,9 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // docs: https://github.com/d3/d3-transition
 // import {} from 'd3-transition';
 
-import { DatasetDocument } from '../demo/types';
+import { DatasetDocument } from '../core/types';
 import { ResetZoomButton } from './common';
-import { createPopover, PopoverController } from '../demo/popover';
+import { createPopover, PopoverController } from '../core/popover';
 
 
 export type SelectedPoints = Set<number>;

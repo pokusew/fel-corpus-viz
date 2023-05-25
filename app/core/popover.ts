@@ -1,4 +1,4 @@
-import { DatasetDocument } from '../core/types';
+import { DatasetDocument } from './types';
 
 
 export interface PopoverController {

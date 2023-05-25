@@ -1,4 +1,4 @@
-import { DatasetDocument } from '../demo/types';
+import { DatasetDocument } from '../core/types';
 import React, {
 	forwardRef,
 	MouseEventHandler,
@@ -15,7 +15,7 @@ import { getIntAndIncrement } from '../helpers/counter';
 import { ResetZoomButton } from './common';
 import { BaseType, select, Selection } from 'd3-selection';
 import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from 'd3-zoom';
-import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../demo/wordcloud';
+import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../core/wordcloud';
 import { SelectedWords } from './scatterplot';
 
 

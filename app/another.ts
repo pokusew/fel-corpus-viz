@@ -2,4 +2,4 @@
 
 import './styles/main.scss';
 
-import './demo/bubbles';
+import './demo/demo';
