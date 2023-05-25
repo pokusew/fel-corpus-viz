@@ -1,13 +1,14 @@
-# fel-corpus-viz
+# Document Corpus Visualization
 
-Visualization of a document corpus using D3.js
+An app for visualization of document corpora (collections) using D3.js
 
 👉 Available online at [pokusew-corpus-viz.netlify.app](https://pokusew-corpus-viz.netlify.app/)
 
 The code is written in **[TypeScript]**, **[D3.js]** and **[React.js]**.
 See more in the [Architecture](#architecture) section.
 
-🚧 **Note:** This is work in progress.
+**Note:** The initial version is finished! 🚀   
+**Next steps:** Finish documentation 📖 and refactor 🧹 some parts of the code.
 
 
 ## Content
@@ -18,6 +19,7 @@ See more in the [Architecture](#architecture) section.
 
 - [Description](#description)
 - [Architecture](#architecture)
+	- [Data preprocessing](#data-preprocessing)
 	- [Project structure](#project-structure)
 - [Development](#development)
 	- [Requirements](#requirements)
@@ -30,7 +32,7 @@ See more in the [Architecture](#architecture) section.
 
 ## Description
 
-TODO
+See 👉 [Final Report – Visualization of a Document Corpus][final-report] on Google Docs.
 
 
 ## Architecture
@@ -40,8 +42,17 @@ _Currently_, it is a client-side-only application (SPA).
 
 The code is written in **[TypeScript]**, **[D3.js]** and **[React.js]**.
 
-The project has [just a few production dependencies](./package.json#L31-L35).
+The project has [just a few production dependencies](./package.json#L37-L46).
 Everything else is implemented from scratch.
+
+
+### Data preprocessing
+
+There is also a separate [**data preprocessing pipeline**](./data-preprocessing/) which is implemented in **Python 3**.   
+See [data-preprocessing](./data-preprocessing/) directory that contains its own README with more info.
+
+The [app/data](./app/data/) directory (versioned in Git) contains already preprocessed data
+of some document collections.
 
 
 ### Project structure
@@ -54,10 +65,16 @@ The following diagram briefly describes the main directories and files:
 . (project root dir)
 ├── .github - GitHub config (GitHub Actions)
 ├── app - the app source code
-│   ├── ...
+│   ├── components - React components for the the main app logic, UI, state, views, plot wrappers
+│   ├── core - D3.js scatterplot and wordcloud, data loading 
+│   ├── data - data for to visualize - stored results of the data preprocessing pipeline
+│   ├── helpers - various common functions
+│   ├── images - the PWA app icon and SVG UI icons
+│   ├── styles - app styles written in Sass (SCSS)
+│   ├── sw - the service worker that handles precaching app shell (not fully integrated)
 │   ├── _headers - Netlify HTTP headers customization
 │   ├── _redirects - Netlify HTTP redirects/rewrites customization
-│   ├── index.js - the app starting point
+│   ├── index.js - the app starting point (entrypoint)
 │   ├── manifest.json - a web app manifest for PWA
 │   ├── robots.txt
 │   ├── routes.ts - app routes definitions
@@ -97,23 +114,6 @@ The following diagram briefly describes the main directories and files:
 2. You are ready to go.
 3. Use `yarn start` to start dev server with HMR.
 4. Then open `http://localhost:3000/` in the browser.
-
-
-### Data preprocessing
-
-The data preprocessing is done in Python 3.9 and all the scripts are part of this repository.
-The scripts are located in the [data-preprocessing](./data-preprocessing) directory.
-
-To run the current version of the preprocessing pipeline:
-
-1. Change into the `data-preprocessing` dir: `cd data-preprocessing`
-2. Download the data of some corpus from [here](https://archive.ics.uci.edu/ml/datasets/Bag+of+Words).
-3. Create and activate a new virtual environment (optional).
-4. Install the dependencies using [Poetry] (`poetry install`) or [pip] (`python -m pip install .`) 
-5. Run the `main.py` script, for example like this:
-```bash
-python main.py --corpus_name kos --preprocess bow --method pca --save_figure
-```
 
 
 ### Available commands
@@ -198,6 +198,4 @@ builds. There are 3 configuration files that affect the deployment behavior:
 
 [web-dev-maskable-icons]: https://web.dev/maskable-icon/
 
-[Potery]: https://python-poetry.org/
-
-[pip]: https://pypi.org/project/pip/
+[final-report]: https://docs.google.com/document/d/1Reoypogxt1u2myzYtI62fP-PJEnU5RT1DioYcaMHXXA/edit?usp=sharing
