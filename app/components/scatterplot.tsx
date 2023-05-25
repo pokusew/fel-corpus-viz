@@ -320,8 +320,8 @@ export class Scatterplot {
 	}
 
 	public zoomToPoint(id: number, withAnimation: boolean = true) {
-		const x = this.xScale(this.data[id].position.x);
-		const y = this.yScale(this.data[id].position.y);
+		const x = this.xScale(this.data[id - 1].position.x);
+		const y = this.yScale(this.data[id - 1].position.y);
 		if (withAnimation) {
 			// with animation:
 			// TODO: remove noinspection once type definitions are fixed
@@ -413,12 +413,8 @@ export class Scatterplot {
 				.attr('id', d => `point-${d.id}`)
 				.attr('r', pointRadius)
 				.on('mouseover', showPopover)
-				// hide the popover when the mouse leaves the circle unless it was clicked on
-				.on('mouseout', (event, d) => {
-					if (!this.selectedPoints.has(d.id)) {
-						hidePopover();
-					}
-				}),
+				// hide the popover when the mouse leaves the circle
+				.on('mouseout', hidePopover),
 			update => update,
 			exit => exit.remove(),
 		)
