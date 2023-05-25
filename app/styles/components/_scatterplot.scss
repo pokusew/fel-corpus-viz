@@ -26,10 +26,6 @@ svg.scatterplot, svg.wordcloud {
 		stroke-width: 1;
 		cursor: pointer;
 
-		&:hover {
-			fill: orange;
-		}
-
 		&.selected {
 			fill: red;
 		}
@@ -37,21 +33,26 @@ svg.scatterplot, svg.wordcloud {
 		&.filtered {
 			fill: green;
 		}
+
+		&:hover {
+			fill: orange;
+		}
+
 	}
 
 	.word {
 		cursor: pointer;
 
-		&:hover {
-			fill: orange;
+		&.selected {
+			fill: red;
 		}
 
 		&.common {
 			fill: green;
 		}
 
-		&.selected {
-			fill: red;
+		&:hover {
+			fill: orange;
 		}
 	}
 
