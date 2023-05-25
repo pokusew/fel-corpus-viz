@@ -18,7 +18,7 @@ import IconFileLinesRegular from '-!svg-react-loader?name=IconMinimizeLight!../i
 import IconFontCaseRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/font-case-regular.svg';
 import IconFilterRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/filter-regular.svg';
 import IconFilterSlashRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/filter-slash-regular.svg';
-import classNames from 'classnames';
+
 
 export interface QueryOperationLoading {
 	status: 'loading';
