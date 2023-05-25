@@ -6,8 +6,8 @@ import { BaseType, select, Selection } from 'd3-selection';
 // docs: https://github.com/d3/d3-zoom
 import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from 'd3-zoom';
 
-import { DatasetDocument } from '../core/types';
-import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../core/wordle';
+import { DatasetDocument } from './types';
+import { calculateFontSizes, generateWordCloudPositions, PositionSize } from './wordle';
 import { SelectedWords } from './scatterplot';
 
 

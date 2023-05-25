@@ -14,8 +14,8 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // docs: https://github.com/d3/d3-transition
 // import {} from 'd3-transition';
 
-import { DatasetDocument } from '../core/types';
-import { createPopover, PopoverController } from '../core/popover';
+import { DatasetDocument } from './types';
+import { createPopover, PopoverController } from './popover';
 
 
 export type SelectedPoints = Set<number>;

@@ -2,7 +2,7 @@
 
 import React, { ChangeEventHandler, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
-import { Scatterplot, SelectedPoints, SelectedWords } from './scatterplot';
+import { Scatterplot, SelectedPoints, SelectedWords } from '../core/scatterplot';
 import { InfoScreen } from './common';
 import { loadDataset } from '../core/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../core/corpora';

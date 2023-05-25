@@ -13,8 +13,8 @@ import { IS_DEVELOPMENT } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 import { DatasetDocument } from '../core/types';
 import { ResetZoomButton } from './common';
-import { SelectedWords } from './scatterplot';
-import { WordCloud } from './wordcloud';
+import { SelectedWords } from '../core/scatterplot';
+import { WordCloud } from '../core/wordcloud';
 
 
 export interface WordCloudWrapperProps {

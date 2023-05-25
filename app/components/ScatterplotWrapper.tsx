@@ -14,7 +14,7 @@ import { IS_DEVELOPMENT } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 import { DatasetDocument } from '../core/types';
 import { ResetZoomButton } from './common';
-import { Scatterplot, SelectedPoints, SelectedWords } from './scatterplot';
+import { Scatterplot, SelectedPoints, SelectedWords } from '../core/scatterplot';
 
 
 export interface ScatterplotWrapperProps {
