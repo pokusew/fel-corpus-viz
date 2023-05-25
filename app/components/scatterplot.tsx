@@ -26,6 +26,7 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 
 import { DatasetDocument } from '../demo/types';
 import { ResetZoomButton } from './common';
+import { hidePopover, showPopover } from '../demo/popover';
 
 
 export type SelectedPoints = Set<number>;
@@ -410,7 +411,14 @@ export class Scatterplot {
 				.append('circle')
 				.attr('class', 'point')
 				.attr('id', d => `point-${d.id}`)
-				.attr('r', pointRadius),
+				.attr('r', pointRadius)
+				.on('mouseover', showPopover)
+				// hide the popover when the mouse leaves the circle unless it was clicked on
+				.on('mouseout', (event, d) => {
+					if (!this.selectedPoints.has(d.id)) {
+						hidePopover();
+					}
+				}),
 			update => update,
 			exit => exit.remove(),
 		)
@@ -454,6 +462,7 @@ export class Scatterplot {
 			if (this.selectedPoints.has(d.id)) {
 				// deselect the point
 				event.target.classList.remove('selected');
+				hidePopover();
 				this.selectedPoints.delete(d.id);
 			} else {
 				// select the point
@@ -470,6 +479,7 @@ export class Scatterplot {
 		if (this.selectedPoints.size > 0) {
 			this.dataGroup.selectAll('.selected')
 				.classed('selected', false);
+			hidePopover();
 			this.selectedPoints.clear();
 			this.onSelectedPointsChange();
 		}
