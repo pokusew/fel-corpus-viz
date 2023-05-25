@@ -11,9 +11,8 @@ import React, {
 
 import { IS_DEVELOPMENT } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
-import { DatasetDocument } from '../core/types';
+import { DatasetDocument, SelectedWords } from '../core/types';
 import { ResetZoomButton } from './common';
-import { SelectedWords } from '../core/scatterplot';
 import { WordCloud } from '../core/wordcloud';
 
 

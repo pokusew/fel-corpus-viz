@@ -12,9 +12,9 @@ import React, {
 
 import { IS_DEVELOPMENT } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
-import { DatasetDocument } from '../core/types';
+import { DatasetDocument, SelectedPoints, SelectedWords } from '../core/types';
 import { ResetZoomButton } from './common';
-import { Scatterplot, SelectedPoints, SelectedWords } from '../core/scatterplot';
+import { Scatterplot } from '../core/scatterplot';
 
 
 export interface ScatterplotWrapperProps {

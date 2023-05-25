@@ -1,5 +1,3 @@
-"use strict";
-
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 
@@ -14,12 +12,9 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // docs: https://github.com/d3/d3-transition
 // import {} from 'd3-transition';
 
-import { DatasetDocument } from './types';
+import { DatasetDocument, SelectedPoints, SelectedWords } from './types';
 import { createPopover, PopoverController } from './popover';
 
-
-export type SelectedPoints = Set<number>;
-export type SelectedWords = Set<string>;
 
 export class Scatterplot {
 

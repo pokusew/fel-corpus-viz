@@ -1,12 +1,10 @@
-"use strict";
-
 import React, { ChangeEventHandler, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
-import { Scatterplot, SelectedPoints, SelectedWords } from '../core/scatterplot';
+import { Scatterplot } from '../core/scatterplot';
 import { InfoScreen } from './common';
 import { loadDataset } from '../core/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../core/corpora';
-import { Dataset, DatasetDocument } from '../core/types';
+import { Dataset, DatasetDocument, SelectedPoints, SelectedWords } from '../core/types';
 import ScatterplotWrapper from './ScatterplotWrapper';
 import WordCloudWrapper from './WordCloudWrapper';
 import { IS_DEVELOPMENT } from '../helpers/common';

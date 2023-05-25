@@ -1,5 +1,6 @@
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from './corpora';
 
+
 export interface Position {
 	x: number;
 	y: number;
@@ -21,3 +22,6 @@ export interface Dataset extends DatasetDescriptor {
 	documents: DatasetDocument[];
 	vocabSize: number;
 }
+
+export type SelectedPoints = Set<number>;
+export type SelectedWords = Set<string>;
