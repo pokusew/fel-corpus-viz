@@ -1,6 +1,6 @@
 "use strict";
 
-import React, { useEffect, useRef, useCallback, useState, MouseEventHandler } from 'react';
+import React, { useId, useRef, RefCallback, useEffect, useCallback, MouseEventHandler } from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 
@@ -15,7 +15,6 @@ import { Axis, axisBottom, axisLeft } from 'd3-axis';
 // docs: https://github.com/d3/d3-transition
 // import {} from 'd3-transition';
 
-import IconMinimizeLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/minimize-light.svg';
 import { DatasetDocument } from '../demo/types';
 import { ResetZoomButton } from './common';
 
@@ -57,10 +56,10 @@ export class Scatterplot {
 
 	private selectedPoints = new Set<number>();
 
-	constructor(wrapperElem: HTMLElement, data: DatasetDocument[], debugId?: number) {
+	constructor(wrapperElem: HTMLElement, debugId?: number) {
 
 		this.debugId = debugId ?? getIntAndIncrement('Scatterplot');
-		this.data = data;
+		this.data = [];
 
 		this.init(wrapperElem);
 	}
@@ -117,6 +116,7 @@ export class Scatterplot {
 		});
 
 		this.computeDataBounds();
+		this.updateScalesDomains();
 
 		// Note:
 		//   Observing svg elements seems to be not working in WebKit (Chrome works great)
@@ -141,10 +141,21 @@ export class Scatterplot {
 	}
 
 	private computeDataBounds() {
+
+		// default range when there are no data
+		if (this.data.length === 0) {
+			this.minX = 0;
+			this.minY = 0;
+			this.maxX = 1;
+			this.maxY = 1;
+			return;
+		}
+
 		this.minX = Infinity;
 		this.minY = Infinity;
 		this.maxX = -Infinity;
 		this.maxY = -Infinity;
+
 		for (const d of this.data) {
 
 			if (d.position.x < this.minX) {
@@ -162,6 +173,10 @@ export class Scatterplot {
 			}
 
 		}
+
+	}
+
+	private updateScalesDomains() {
 		this.xScale.domain([this.minX, this.maxX]);
 		this.yScale.domain([this.minY, this.maxY]);
 	}
@@ -206,16 +221,17 @@ export class Scatterplot {
 
 	}
 
-	public resetZoom() {
-		// without animation:
-		// this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
-
-		// with animation:
-		// TODO: remove noinspection once type definitions are fixed
-		// noinspection TypeScriptValidateTypes
-		this.svgSelection.transition()
-			.duration(750)
-			.call(this.zoomBehavior.transform, zoomIdentity);
+	public resetZoom(withAnimation: boolean = true) {
+		if (withAnimation) {
+			// with animation:
+			// TODO: remove noinspection once type definitions are fixed
+			// noinspection TypeScriptValidateTypes
+			this.svgSelection.transition()
+				.duration(750)
+				.call(this.zoomBehavior.transform, zoomIdentity);
+		} else {
+			this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
+		}
 	}
 
 	private updateSize(width: number, height: number) {
@@ -241,20 +257,23 @@ export class Scatterplot {
 
 		this.sizeInitialized = true;
 
-		this.updateScalesWithZoomTransform();
-
 		this.dataGroupWrapper
 			.attr('transform', `translate(${this.xMargin},${this.yMargin})`);
 
 		this.xAxisGroup
-			.attr('transform', `translate(${this.xMargin},${this.height - this.yMargin})`)
-			.call(this.xAxis);
+			.attr('transform', `translate(${this.xMargin},${this.height - this.yMargin})`);
 		this.yAxisGroup
-			.attr('transform', `translate(${this.xMargin},${this.yMargin})`)
-			.call(this.yAxis);
+			.attr('transform', `translate(${this.xMargin},${this.yMargin})`);
 
+		this.updateScalesWithZoomTransform();
+		this.mapAxesToElements();
 		this.mapDataToElements();
 
+	}
+
+	private mapAxesToElements() {
+		this.xAxisGroup.call(this.xAxis);
+		this.yAxisGroup.call(this.yAxis);
 	}
 
 	private mapDataToElements() {
@@ -348,8 +367,32 @@ export class Scatterplot {
 		// TODO: emit event / invoke callback
 	}
 
-	destroy() {
-		IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] destroy`);
+	public setData(data: DatasetDocument[]) {
+
+		IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] setData`, data.length);
+
+		this.data = data;
+		this.computeDataBounds();
+		this.updateScalesDomains();
+
+		// only attempt to render if the size has already been initialized
+		// the size is initialized in updateSize() which also call
+		// these methods (apart from resetZoom) to re-render the plot
+		if (this.sizeInitialized) {
+			this.resetZoom(false);
+			this.updateScalesWithZoomTransform();
+			this.mapAxesToElements();
+			this.mapDataToElements();
+		}
+
+	}
+
+	public clearData() {
+		this.setData([]);
+	}
+
+	public destroy() {
+		IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] destroy`, this.svgElem.isConnected);
 		// unregister the resizeObserver otherwise the callback will be invoked
 		// when the svg element is removed from the DOM nad its size changes to 0
 		this.resizeObserver.disconnect();
@@ -362,15 +405,50 @@ export class Scatterplot {
 }
 
 export interface ScatterplotWrapperProps {
-	data: DatasetDocument[];
+	data: DatasetDocument[] | undefined;
 }
 
 export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 
-	const wrapperElemRef = useRef<HTMLDivElement | null>(null);
+	const id = useId();
 	const plotRef = useRef<Scatterplot | null>(null);
 
-	// const [count, setCount] = useState<number>(0);
+	// see https://react.dev/reference/react-dom/components/common#ref-callback
+	// see https://julesblom.com/writing/ref-callback-use-cases
+	const handleWrapperElemRefChange: RefCallback<HTMLDivElement> = useCallback((elem) => {
+
+		IS_DEVELOPMENT && console.log(
+			`[ScWr][${id}] handleWrapperElemRefChange ref callback invocation`,
+			// elem, plotRef.current,
+		);
+
+		if (elem instanceof HTMLDivElement) {
+			if (plotRef.current !== null) {
+				IS_DEVELOPMENT && console.error(
+					`[ScWr][${id}] handleWrapperElemRefChange unexpected state:`,
+					`elem instanceof HTMLDivElement && plotRef.current !== null`,
+					elem, plotRef.current,
+				);
+				return;
+			}
+			plotRef.current = new Scatterplot(elem);
+			return;
+		}
+
+		const plot = plotRef.current;
+		if (plot === null) {
+			IS_DEVELOPMENT && console.error(
+				`[ScWr][${id}] handleWrapperElemRefChange unexpected state:`,
+				`elem === null && plotRef.current !== null`,
+				elem, plotRef.current,
+			);
+			return;
+		}
+
+		plot.destroy();
+		plotRef.current = null;
+
+	}, [id]);
 
 	const handleResetZoom = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
 
@@ -387,36 +465,31 @@ export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 
 	useEffect(() => {
 
-		if (!(wrapperElemRef.current instanceof HTMLDivElement)) {
+		if (!(plotRef.current instanceof Scatterplot)) {
 			return;
 		}
 
-		const debugId = getIntAndIncrement('ScatterplotWrapper:wrapperElemRef');
+		const effectId = getIntAndIncrement('ScatterplotWrapper:dataEffect');
 
-		IS_DEVELOPMENT && console.log(`[ScWr][${debugId}] wrapperElemRef effect run`);
-		const wrapperElem: HTMLDivElement = wrapperElemRef.current;
+		const plot: Scatterplot = plotRef.current;
 
-		if (plotRef.current !== null) {
-			IS_DEVELOPMENT && console.error(`[ScWr][${debugId}] wrapperElemRef plotRef.current !== null`);
+		IS_DEVELOPMENT && console.log(`[ScWr][${id}] data effect ${effectId}: run with data?.length =`, data?.length);
+
+		if (data !== undefined) {
+			plot.setData(data);
 		}
 
-		const plot = new Scatterplot(wrapperElem, data);
-
-		plotRef.current = plot;
-
 		return () => {
-			IS_DEVELOPMENT && console.log(`[ScWr][${debugId}] wrapperElemRef effect cleanup`);
-			plot.destroy();
-			plotRef.current = null;
+			IS_DEVELOPMENT && console.log(`[ScWr][${id}] data effect ${effectId}: cleanup`);
+			plot.clearData();
 		};
 
-	}, [data]);
+	}, [id, data]);
 
 	return (
 		<div
-			ref={wrapperElemRef}
+			ref={handleWrapperElemRefChange}
 			className="scatterplot-wrapper"
-			// onClick={() => setCount(prevCount => prevCount + 1)}
 		>
 			<div className="toolbar">
 				<ResetZoomButton onClick={handleResetZoom} />
