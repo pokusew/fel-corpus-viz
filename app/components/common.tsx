@@ -47,10 +47,8 @@ export interface ResetZoomButtonProps {
 	onClick: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export const ResetZoomButton = (
-	{onClick}: ResetZoomButtonProps,
-) => (
-	<button name="resetZoom" className="btn btn-sm" onClick={onClick}>
+export const ResetZoomButton = ({ onClick }: ResetZoomButtonProps) => (
+	<button type="button" name="resetZoom" className="btn btn-sm" onClick={onClick}>
 		<IconMinimizeLight className="icon" aria-hidden={true} />
 		<span>Reset zoom</span>
 	</button>
