@@ -2,12 +2,13 @@
 
 import React, { ChangeEventHandler, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { getIntAndIncrement } from '../helpers/counter';
-import { Scatterplot, ScatterplotWrapper, SelectedPoints, SelectedWords } from './scatterplot';
+import { Scatterplot, SelectedPoints, SelectedWords } from './scatterplot';
 import { InfoScreen } from './common';
 import { loadDataset } from '../core/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../core/corpora';
 import { Dataset, DatasetDocument } from '../core/types';
-import { WordCloudWrapper } from './wordcloud';
+import ScatterplotWrapper from './ScatterplotWrapper';
+import WordCloudWrapper from './WordCloudWrapper';
 import { IS_DEVELOPMENT } from '../helpers/common';
 import IconXmarkLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/xmark-light.svg';
 import ObjectUnionSolidLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/object-union-solid.svg';
