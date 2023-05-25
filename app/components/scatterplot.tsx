@@ -163,7 +163,7 @@ export class Scatterplot {
 
 		}
 		this.xScale.domain([this.minX, this.maxX]);
-		this.yScale.domain([this.maxY, this.minY]);
+		this.yScale.domain([this.minY, this.maxY]);
 	}
 
 	private updateScalesWithZoomTransform(transform?: ZoomTransform): boolean {
@@ -237,7 +237,7 @@ export class Scatterplot {
 		this.svgSelection.attr('viewBox', [0, 0, width, height]);
 
 		this.xScale.range([0, this.width - 2 * this.xMargin]);
-		this.yScale.range([0, this.height - 2 * this.yMargin]);
+		this.yScale.range([this.height - 2 * this.yMargin, 0]);
 
 		this.sizeInitialized = true;
 
