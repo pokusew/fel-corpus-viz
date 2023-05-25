@@ -81,13 +81,19 @@ jobs:
           yarn lint |& tee temp/eslint-output.txt
         shell: bash
 
-      # TODO: re-enable once we fix tsc config
-      # - name: Run tsc
-      #   if: ${{ success() || failure() }}
-      #   run: |
-      #     mkdir -p temp
-      #     yarn tsc |& tee temp/tsc-output.txt
-      #   shell: bash
+      - name: Run tsc for main code
+        if: ${{ success() || failure() }}
+        run: |
+          mkdir -p temp
+          yarn tsc |& tee temp/tsc-root-output.txt
+        shell: bash
+
+      - name: Run tsc for sw code
+        if: ${{ success() || failure() }}
+        run: |
+          mkdir -p temp
+          yarn tsc -p app/sw/ |& tee temp/tsc-sw-output.txt
+        shell: bash
 
       - name: Store test results
         if: ${{ success() || failure() }}

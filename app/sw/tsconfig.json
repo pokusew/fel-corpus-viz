@@ -18,12 +18,22 @@
 		// Import non-ES modules as default imports.
 		"esModuleInterop": true,
 		"jsx": "preserve",
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		// https://www.typescriptlang.org/tsconfig#types
+		"types": [
+			// manually list the @types/node package that we want
+			// to avoid automatically including all @types/d3-* which rely on DOM lib
+			// and thus will result in tsc errors when typechecking this service worker code
+			"node"
+		]
 	},
-	"exclude": [
-		// see https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-a-file-in-the-exclude-list-still-picked-up-by-the-compiler
-		// use `yarn tsc --listFiles` to list what files are included in the compilation,
-		// and `yarn tsc --traceResolution` to see why they were included
-		"**/node_modules/**/*"
+	// https://www.typescriptlang.org/tsconfig#files
+	// https://www.typescriptlang.org/tsconfig#include
+	// https://www.typescriptlang.org/tsconfig#exclude
+	// see https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-a-file-in-the-exclude-list-still-picked-up-by-the-compiler
+	// use `yarn tsc --listFiles` to list what files are included in the compilation,
+	// and `yarn tsc --traceResolution` to see why they were included
+	"files": [
+		"./sw.ts"
 	]
 }

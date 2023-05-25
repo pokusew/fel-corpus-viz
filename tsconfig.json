@@ -20,11 +20,17 @@
 		"jsx": "preserve",
 		"resolveJsonModule": true
 	},
+	// https://www.typescriptlang.org/tsconfig#files
+	// https://www.typescriptlang.org/tsconfig#include
+	// https://www.typescriptlang.org/tsconfig#exclude
+	// see https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-a-file-in-the-exclude-list-still-picked-up-by-the-compiler
+	// use `yarn tsc --listFiles` to list what files are included in the compilation,
+	// and `yarn tsc --traceResolution` to see why they were included
+	"include": [
+		"./types/",
+		"./app/"
+	],
 	"exclude": [
-		// see https://github.com/Microsoft/TypeScript/wiki/FAQ#why-is-a-file-in-the-exclude-list-still-picked-up-by-the-compiler
-		// use `yarn tsc --listFiles` to list what files are included in the compilation,
-		// and `yarn tsc --traceResolution` to see why they were included
-		"**/node_modules/**/*",
-		"app/sw/**/*"
+		"./app/sw/"
 	]
 }
