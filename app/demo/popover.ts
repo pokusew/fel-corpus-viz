@@ -11,6 +11,18 @@ export function createPopover(container: HTMLElement): PopoverController {
 
 	let popover: HTMLDivElement | null = document.createElement('div');
 	popover.classList.add('popover');
+
+	const line1 = new Text();
+	const line2 = new Text();
+	const line3 = new Text();
+	popover.append(
+		line1,
+		document.createElement('br'),
+		line2,
+		document.createElement('br'),
+		line3,
+	);
+
 	container.append(popover);
 
 	function showPopover(event: PointerEvent, doc: DatasetDocument) {
@@ -26,14 +38,9 @@ export function createPopover(container: HTMLElement): PopoverController {
 			.map(([word, count]) => `${word}: ${count}`)
 			.join(', ');
 
-		popover.replaceChildren();
-		popover.append(
-			`ID: ${doc.id}`,
-			document.createElement('br'),
-			`x: ${doc.position.x.toFixed(2)}, y: ${doc.position.y.toFixed(2)}`,
-			document.createElement('br'),
-			`Top words: ${topWords}`,
-		);
+		line1.nodeValue = `ID: ${doc.id}`;
+		line2.nodeValue = `x: ${doc.position.x.toFixed(2)}, y: ${doc.position.y.toFixed(2)}`;
+		line3.nodeValue = `Top words: ${topWords}`;
 
 		popover.style.left = `${event.pageX}px`;
 		popover.style.top = `${event.pageY}px`;
