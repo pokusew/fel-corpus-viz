@@ -536,7 +536,8 @@ export const ScatterplotWrapper = forwardRef((
 		data,
 		onSelectedPointsChange,
 		selectedPoints,
-	}: ScatterplotWrapperProps, ref,
+	}: ScatterplotWrapperProps,
+	ref,
 ) => {
 
 	const id = useId();

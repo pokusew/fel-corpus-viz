@@ -1,19 +1,37 @@
 import { DatasetDocument } from '../demo/types';
-import React, { MouseEventHandler, useCallback, useEffect, useRef } from 'react';
-import { IS_DEVELOPMENT } from '../helpers/common';
+import React, {
+	forwardRef,
+	MouseEventHandler,
+	RefCallback,
+	useCallback,
+	useEffect,
+	useId,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from 'react';
+import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 import { ResetZoomButton } from './common';
-import { select, Selection } from 'd3-selection';
+import { BaseType, select, Selection } from 'd3-selection';
 import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from 'd3-zoom';
-import { calculateFontSizes, generateWordCloudPositions } from '../demo/wordcloud';
+import { calculateFontSizes, generateWordCloudPositions, PositionSize } from '../demo/wordcloud';
+import { SelectedWords } from './scatterplot';
 
+
+interface Word {
+	word: string;
+	pos: PositionSize;
+	fontSize: number,
+}
 
 export class WordCloud {
 
 	private readonly debugId: number;
 
 	private svgElem: SVGSVGElement;
-	private document: DatasetDocument;
+	private data: Word[] = [];
+	private document: DatasetDocument | undefined;
 
 	private svgSelection: Selection<SVGSVGElement, DatasetDocument, null, any>;
 	private dataGroupWrapper: Selection<SVGGElement, DatasetDocument, null, any>;
@@ -24,15 +42,64 @@ export class WordCloud {
 	private width: number;
 	private height: number;
 
-	private xMargin: number = 30;
-	private yMargin: number = 30;
+	private xMargin: number = 32;
+	private yMargin: number = 32;
 
-	constructor(wrapperElem: HTMLElement, document: DatasetDocument, debugId?: number) {
+	private selectedWordsChangeHandler: ((points: SelectedWords) => void) | undefined;
+	private selectedWords: Set<string> = new Set<string>();
+	private selectedWordsImmutable: SelectedWords = new Set<string>();
+
+	constructor(wrapperElem: HTMLElement, debugId?: number) {
 
 		this.debugId = debugId ?? getIntAndIncrement('WordCloud');
-		this.document = document;
+		this.document = undefined;
 
 		this.init(wrapperElem);
+	}
+
+	public setSelectedWordsChangeHandler(handler: (points: SelectedWords) => void | undefined) {
+		this.selectedWordsChangeHandler = handler;
+	}
+
+	public setSelectedWords(points: SelectedWords) {
+
+		if (this.selectedWordsImmutable === points) {
+			return;
+		}
+
+		this.selectedWords.clear();
+		for (const id of points) {
+			this.selectedWords.add(id);
+		}
+
+		this.selectedWordsImmutable = points;
+
+		this.mapSelectedWordsToElements();
+
+	}
+
+	private mapSelectedWordsToElements() {
+
+		IS_DEVELOPMENT && console.log(
+			`[WordCloudD3][${this.debugId}] mapSelectedWordsToElements`, this.selectedWords,
+		);
+
+		// TODO: maybe there is a more effective way
+		this.dataGroup.selectAll('.word')
+			.data(this.data)
+			.classed('selected', (d) => this.selectedWords.has(d.word));
+	}
+
+	public setData(doc: DatasetDocument | undefined) {
+		this.document = doc;
+		if (this.sizeInitialized) {
+			this.mapData();
+		}
+
+	}
+
+	public clearData() {
+		this.setData(undefined);
 	}
 
 	private init(wrapperElem: HTMLElement) {
@@ -42,6 +109,13 @@ export class WordCloud {
 		wrapperElem.append(this.svgElem);
 
 		this.svgSelection = select(this.svgElem);
+
+		const self = this;
+
+		this.svgSelection.on('click', function (event, d) {
+			// note: we actually do not need this, as this === event.currentTarget
+			self.handleClick(this, event, d);
+		});
 
 		this.dataGroupWrapper = this.svgSelection.append('g')
 			.attr('class', 'data-wrapper');
@@ -62,16 +136,50 @@ export class WordCloud {
 		this.dataGroup.attr('transform', transform.toString());
 	}
 
-	public resetZoom() {
-		// without animation:
-		// this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
+	public resetZoom(withAnimation: boolean = true) {
+		if (withAnimation) {
+			// with animation:
+			// TODO: remove noinspection once type definitions are fixed
+			// noinspection TypeScriptValidateTypes
+			this.svgSelection.transition()
+				.duration(750)
+				.call(this.zoomBehavior.transform, zoomIdentity);
+		} else {
+			this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
+		}
+	}
 
-		// with animation:
-		// TODO: remove noinspection once type definitions are fixed
-		// noinspection TypeScriptValidateTypes
-		this.svgSelection.transition()
-			.duration(750)
-			.call(this.zoomBehavior.transform, zoomIdentity);
+	private mapData() {
+		IS_DEVELOPMENT && console.log(`[WordCloudD3][${this.debugId}] mapDataToElements`);
+
+		if (this.document === undefined) {
+			return null;
+		}
+
+		const wordCounts = this.document.wordCounts;
+		const wordFontSizes = calculateFontSizes(wordCounts);
+		const wordPositions = generateWordCloudPositions(
+			wordFontSizes,
+			this.width - 2 * this.xMargin,
+			this.height - 2 * this.yMargin,
+		);
+
+		this.data = [...wordPositions.entries()].map(([word, pos]) => ({
+			word,
+			pos,
+			fontSize: wordFontSizes.get(word)!,
+		}));
+
+		this.dataGroup.selectAll('text')
+			.data(this.data)
+			.enter()
+			.append('text')
+			.attr('class', 'word')
+			.attr('x', d => d.pos.x)
+			// SVG text y position is at baseline, so we need to shift the text by its height
+			.attr('y', d => d.pos.y + d.pos.height)
+			.attr('font-size', d => `${d.fontSize}px`)
+			.text(d => d.word);
 	}
 
 	private renderWordCloud(width: number, height: number) {
@@ -96,22 +204,48 @@ export class WordCloud {
 		this.dataGroupWrapper
 			.attr('transform', `translate(${this.xMargin},${this.yMargin})`);
 
-		IS_DEVELOPMENT && console.log(`[WordCloudD3][${this.debugId}] mapDataToElements`);
+	}
 
-		const wordCounts = this.document.wordCounts;
-		const wordFontSizes = calculateFontSizes(wordCounts);
-		const wordPositions = generateWordCloudPositions(wordFontSizes, this.width, this.height);
+	private handleClick(callbackThis: BaseType, event: PointerEvent, callbackD: DatasetDocument | undefined) {
 
-		wordPositions.forEach((pos, word) => {
-			const fontSize = wordFontSizes.get(word)!;
-			this.dataGroup
-				.append('text')
-				.attr('x', pos.x)
-				// SVG text y position is at baseline, so we need to shift the text by its height
-				.attr('y', pos.y + pos.height)
-				.attr('font-size', `${fontSize}px`)
-				.text(word);
-		});
+		// if the user clicked on some data point
+		if (
+			event.target instanceof SVGTextElement
+			&& isDefined(event.target['__data__'])
+		) {
+			// const d = select(event.target).datum() as DatasetDocument;
+			const d = event.target['__data__'] as Word;
+			if (this.selectedWords.has(d.word)) {
+				// deselect the point
+				event.target.classList.remove('selected');
+				this.selectedWords.delete(d.word);
+			} else {
+				// select the point
+				event.target.classList.add('selected');
+				this.selectedWords.add(d.word);
+			}
+			this.onSelectedWordsChange();
+			// stop processing the event
+			return;
+		}
+
+		// otherwise, the user clicked somewhere else (within the svg container)
+		// -> deselect the previously selected point(s)
+		if (this.selectedWords.size > 0) {
+			this.dataGroup.selectAll('.selected')
+				.classed('selected', false);
+			this.selectedWords.clear();
+			this.onSelectedWordsChange();
+		}
+
+	}
+
+	private onSelectedWordsChange() {
+		IS_DEVELOPMENT && console.log(`[WordCloudD3][${this.debugId}] onSelectedWordsChange`, this.selectedWords);
+		this.selectedWordsImmutable = new Set(this.selectedWords);
+		if (this.selectedWordsChangeHandler !== undefined) {
+			this.selectedWordsChangeHandler(this.selectedWordsImmutable);
+		}
 	}
 
 	destroy() {
@@ -126,19 +260,74 @@ export class WordCloud {
 
 export interface WordCloudWrapperProps {
 	document: DatasetDocument;
+	onSelectedWordsChange: (points: SelectedWords) => void;
+	selectedWords: SelectedWords;
 }
 
-export const WordCloudWrapper = ({ document }: WordCloudWrapperProps) => {
+export const WordCloudWrapper = forwardRef((
+	{
+		document,
+		onSelectedWordsChange,
+		selectedWords,
+	}: WordCloudWrapperProps,
+	ref,
+) => {
 
-	const wrapperElemRef = useRef<HTMLDivElement | null>(null);
+	const id = useId();
 	const plotRef = useRef<WordCloud | null>(null);
+
+	useImperativeHandle(ref, () => {
+		const initId = getIntAndIncrement('WordCloudWrapper:useImperativeHandle');
+		IS_DEVELOPMENT && console.log(
+			`[WCWr][${id}] useImperativeHandle ${initId} callback invocation`,
+			plotRef.current != null,
+		);
+		return plotRef.current;
+	}, [id]);
+
+	// see https://react.dev/reference/react-dom/components/common#ref-callback
+	// see https://julesblom.com/writing/ref-callback-use-cases
+	const handleWrapperElemRefChange: RefCallback<HTMLDivElement> = useCallback((elem) => {
+
+		IS_DEVELOPMENT && console.log(
+			`[WCWr][${id}] handleWrapperElemRefChange ref callback invocation`,
+			// elem, plotRef.current,
+		);
+
+		if (elem instanceof HTMLDivElement) {
+			if (plotRef.current !== null) {
+				IS_DEVELOPMENT && console.error(
+					`[WCWr][${id}] handleWrapperElemRefChange unexpected state:`,
+					`elem instanceof HTMLDivElement && plotRef.current !== null`,
+					elem, plotRef.current,
+				);
+				return;
+			}
+			plotRef.current = new WordCloud(elem);
+			return;
+		}
+
+		const plot = plotRef.current;
+		if (plot === null) {
+			IS_DEVELOPMENT && console.error(
+				`[WCWr][${id}] handleWrapperElemRefChange unexpected state:`,
+				`elem === null && plotRef.current !== null`,
+				elem, plotRef.current,
+			);
+			return;
+		}
+
+		plot.destroy();
+		plotRef.current = null;
+
+	}, [id]);
 
 	const handleResetZoom = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
 
 		event.preventDefault();
 
 		if (!(plotRef.current instanceof WordCloud)) {
-			IS_DEVELOPMENT && console.error(`[ScWr] handleResetZoom missing plotRef.current`);
+			IS_DEVELOPMENT && console.error(`[WCWr] handleResetZoom missing plotRef.current`);
 			return;
 		}
 
@@ -148,36 +337,49 @@ export const WordCloudWrapper = ({ document }: WordCloudWrapperProps) => {
 
 	useEffect(() => {
 
-		if (!(wrapperElemRef.current instanceof HTMLDivElement)) {
+		if (!(plotRef.current instanceof WordCloud)) {
 			return;
 		}
 
-		const debugId = getIntAndIncrement('WordCloudWrapper:wrapperElemRef');
+		plotRef.current.setSelectedWordsChangeHandler(onSelectedWordsChange);
 
-		IS_DEVELOPMENT && console.log(`[ScWr][${debugId}] wrapperElemRef effect run`);
-		const wrapperElem: HTMLDivElement = wrapperElemRef.current;
+	}, [onSelectedWordsChange]);
 
-		if (plotRef.current !== null) {
-			IS_DEVELOPMENT && console.error(`[ScWr][${debugId}] wrapperElemRef plotRef.current !== null`);
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof WordCloud)) {
+			return;
 		}
 
-		const plot = new WordCloud(wrapperElem, document);
+		const effectId = getIntAndIncrement('WordCloudWrapper:dataEffect');
 
-		plotRef.current = plot;
+		const plot: WordCloud = plotRef.current;
+
+		IS_DEVELOPMENT && console.log(`[WCWr][${id}] data effect ${effectId}: run`);
+
+		plot.setData(document);
 
 		return () => {
-			IS_DEVELOPMENT && console.log(`[ScWr][${debugId}] wrapperElemRef effect cleanup`);
-			plot.destroy();
-			plotRef.current = null;
+			IS_DEVELOPMENT && console.log(`[WCWr][${id}] data effect ${effectId}: cleanup`);
+			plot.clearData();
 		};
 
-	}, [document]);
+	}, [id, document]);
+
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof WordCloud)) {
+			return;
+		}
+
+		plotRef.current.setSelectedWords(selectedWords);
+
+	}, [selectedWords]);
 
 	return (
 		<div
-			ref={wrapperElemRef}
-			className="scatterplot-wrapper"
-			// onClick={() => setCount(prevCount => prevCount + 1)}
+			ref={handleWrapperElemRefChange}
+			className="wordcloud-wrapper"
 		>
 			<div className="toolbar">
 				<ResetZoomButton onClick={handleResetZoom} />
@@ -185,4 +387,4 @@ export const WordCloudWrapper = ({ document }: WordCloudWrapperProps) => {
 		</div>
 	);
 
-};
+});

@@ -6,7 +6,7 @@ import { Scatterplot, ScatterplotWrapper, SelectedPoints, SelectedWords } from '
 import { InfoScreen } from './common';
 import { loadDataset } from '../demo/load-dataset';
 import { CorpusName, EmbeddingMethod, PreprocessingMethod } from '../demo/corpora';
-import { Dataset } from '../demo/types';
+import { Dataset, DatasetDocument } from '../demo/types';
 import { WordCloudWrapper } from './wordcloud';
 import { IS_DEVELOPMENT } from '../helpers/common';
 import IconXmarkLight from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/xmark-light.svg';
@@ -36,15 +36,79 @@ export interface QueryOperationError {
 export type QueryOperation<T> = QueryOperationLoading | QueryOperationSuccess<T> | QueryOperationError;
 
 
-export interface WordcloudViewProps {
-	dataset: Dataset;
+export interface DocumentOverviewProps {
+	document: DatasetDocument;
 }
 
-export const WordcloudView = ({ dataset }: WordcloudViewProps) => {
+export const DocumentOverview = ({ document }: DocumentOverviewProps) => {
+
+	return (
+		<div className="document-overview">
+			<h2 className="document-name">#{document.id}</h2>
+			<div className="stats">
+				<div className="stats-value">
+					<div className="name">
+						num unique words
+					</div>
+					<div className="value">
+						{document.wordCounts.size}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+
+};
+
+export interface WordcloudViewParams {
+	mode: 'compare' | 'union' | 'intersection';
+	documents: DatasetDocument[];
+}
+
+export interface WordcloudViewProps {
+	params: WordcloudViewParams;
+	onClose: () => void;
+	selectedWords: SelectedWords;
+	onSelectedWordsChange: (words: SelectedWords) => void;
+}
+
+export const WordcloudView = ({ params, onClose, selectedWords, onSelectedWordsChange }: WordcloudViewProps) => {
 
 	return (
 		<div className="wordcloud-view">
-			TODO
+			<div className="wordcloud-view-header">
+				<button
+					type="button"
+					className="btn btn-danger close-btn"
+					onClick={onClose}
+				>
+					<IconXmarkLight className="icon" aria-hidden={true} />
+					<span className="sr-only">Close</span>
+				</button>
+				<h1>{params.mode[0].toUpperCase()}{params.mode.slice(1)}</h1>
+				<div className="stats">
+					<div className="stats-value">
+						<div className="name">
+							num common words
+						</div>
+						<div className="value">
+							TODO
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="wordcloud-view-container">
+				{params.documents.map(doc => (
+					<div className="document-wrapper">
+						<DocumentOverview document={doc} />
+						<WordCloudWrapper
+							document={doc}
+							onSelectedWordsChange={onSelectedWordsChange}
+							selectedWords={selectedWords}
+						/>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 
@@ -201,27 +265,6 @@ const CorpusViz = () => {
 	const [preprocessingMethod, setPreprocessingMethod] = useState<PreprocessingMethod>('bow');
 	const [embeddingMethod, setEmbeddingMethod] = useState<EmbeddingMethod>('pca');
 
-	const handleCorpusNameChange = useCallback((newCorpusName: CorpusName) => {
-		setDatasetQuery({ status: 'loading' });
-		setCorpusName(newCorpusName);
-		setSelectedPoints(new Set());
-		setSelectedWords(new Set());
-	}, []);
-
-	const handlePreprocessingMethodChange = useCallback((newPreprocessingMethod: PreprocessingMethod) => {
-		setDatasetQuery({ status: 'loading' });
-		setPreprocessingMethod(newPreprocessingMethod);
-		// setSelectedPoints(new Set());
-		// setSelectedWords(new Set());
-	}, []);
-
-	const handleEmbeddingMethodChange = useCallback((newEmbeddingMethod: EmbeddingMethod) => {
-		setDatasetQuery({ status: 'loading' });
-		setEmbeddingMethod(newEmbeddingMethod);
-		// setSelectedPoints(new Set());
-		// setSelectedWords(new Set());
-	}, []);
-
 	const [datasetQuery, setDatasetQuery] = useState<QueryOperation<Dataset>>({ status: 'loading' });
 
 	const [selectedPoints, setSelectedPoints] = useState<SelectedPoints>(new Set<number>());
@@ -229,6 +272,16 @@ const CorpusViz = () => {
 
 	const handleSelectedPointsChange = useCallback((newSelectedPoints) => {
 		setSelectedPoints(newSelectedPoints);
+	}, []);
+
+	const handleSelectedWordsChange = useCallback((newSelectedWords) => {
+		setSelectedWords(newSelectedWords);
+	}, []);
+
+	const [wordcloudViewParams, setWordcloudViewParams] = useState<WordcloudViewParams | null>(null);
+
+	const handleWordcloudViewClose = useCallback(() => {
+		setWordcloudViewParams(null);
 	}, []);
 
 	const scatterplotRef = useRef<Scatterplot | null>(null);
@@ -277,6 +330,28 @@ const CorpusViz = () => {
 
 	}, [corpusName, preprocessingMethod, embeddingMethod]);
 
+	const handleCorpusNameChange = useCallback((newCorpusName: CorpusName) => {
+		setDatasetQuery({ status: 'loading' });
+		setCorpusName(newCorpusName);
+		setWordcloudViewParams(null);
+		setSelectedPoints(new Set());
+		setSelectedWords(new Set());
+	}, []);
+
+	const handlePreprocessingMethodChange = useCallback((newPreprocessingMethod: PreprocessingMethod) => {
+		setDatasetQuery({ status: 'loading' });
+		setPreprocessingMethod(newPreprocessingMethod);
+		// setSelectedPoints(new Set());
+		// setSelectedWords(new Set());
+	}, []);
+
+	const handleEmbeddingMethodChange = useCallback((newEmbeddingMethod: EmbeddingMethod) => {
+		setDatasetQuery({ status: 'loading' });
+		setEmbeddingMethod(newEmbeddingMethod);
+		// setSelectedPoints(new Set());
+		// setSelectedWords(new Set());
+	}, []);
+
 	// note: we always render the ScatterplotWrapper component so that is not recreated when changing datasets
 	//       (but it is hidden under the loading/error screen)
 	return (
@@ -288,6 +363,14 @@ const CorpusViz = () => {
 				selectedPoints={selectedPoints}
 				selectedWords={selectedWords}
 			/>
+			{wordcloudViewParams !== null && (
+				<WordcloudView
+					params={wordcloudViewParams}
+					onClose={handleWordcloudViewClose}
+					onSelectedWordsChange={handleSelectedWordsChange}
+					selectedWords={selectedWords}
+				/>
+			)}
 			{datasetQuery.status === 'loading' && (
 				<InfoScreen status="loading" className="app-scatterplot-screen" message="Loading dataset ..." />
 			)}
@@ -360,16 +443,55 @@ const CorpusViz = () => {
 								))}
 							</div>
 							<div className="controls-section-toolbar">
-								<button type="button" className="btn">
+								<button
+									type="button"
+									className="btn"
+									onClick={(event) => {
+										event.preventDefault();
+										if (datasetQuery.status !== 'success') {
+											return;
+										}
+										setWordcloudViewParams({
+											mode: 'compare',
+											documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),
+										});
+									}}
+								>
 									<ObjectsColumnSolid className="icon" aria-hidden={true} />
 									<span className="sr-only">Compare selection</span>
 									<span>Compare</span>
 								</button>
-								<button type="button" className="btn">
+								<button
+									type="button"
+									className="btn"
+									onClick={(event) => {
+										event.preventDefault();
+										if (datasetQuery.status !== 'success') {
+											return;
+										}
+										setWordcloudViewParams({
+											mode: 'intersection',
+											documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),
+										});
+									}}
+								>
 									<CirclesOverlapRegular className="icon" aria-hidden={true} />
 									<span className="sr-only">Show intersection</span>
 								</button>
-								<button type="button" className="btn">
+								<button
+									type="button"
+									className="btn"
+									onClick={(event) => {
+										event.preventDefault();
+										if (datasetQuery.status !== 'success') {
+											return;
+										}
+										setWordcloudViewParams({
+											mode: 'union',
+											documents: [...selectedPoints].map(id => datasetQuery.data.documents[id]),
+										});
+									}}
+								>
 									<ObjectUnionSolidLight className="icon" aria-hidden={true} />
 									<span className="sr-only">Show union</span>
 								</button>

@@ -2,14 +2,14 @@
 // Scatterplot
 // --------------------------------------------------
 
-.scatterplot-wrapper {
+.scatterplot-wrapper, .wordcloud-wrapper {
 	position: relative;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
 }
 
-svg.scatterplot {
+svg.scatterplot,svg.wordcloud {
 	display: block;
 	width: 100%;
 	height: 100%;
@@ -26,6 +26,17 @@ svg.scatterplot {
 		stroke-width: 1;
 		cursor: pointer;
 
+		&:hover {
+			fill: orange;
+		}
+
+		&.selected {
+			fill: red;
+		}
+	}
+
+	.word {
+		cursor: pointer;
 		&:hover {
 			fill: orange;
 		}

@@ -27,7 +27,7 @@ export function calculateFontSizes(wordCounts: Map<string, number>): Map<string,
 }
 
 
-interface PositionSize extends Position {
+export interface PositionSize extends Position {
 	width: number;
 	height: number;
 }
