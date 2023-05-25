@@ -14,6 +14,11 @@ svg.scatterplot {
 	width: 100%;
 	height: 100%;
 	background-color: white;
+	cursor: grab;
+
+	&:active {
+		cursor: grabbing;
+	}
 
 	.point {
 		fill: yellow;

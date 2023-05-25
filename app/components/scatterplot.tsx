@@ -1,6 +1,15 @@
 "use strict";
 
-import React, { useId, useRef, RefCallback, useEffect, useCallback, MouseEventHandler } from 'react';
+import React, {
+	useId,
+	useRef,
+	RefCallback,
+	useEffect,
+	useCallback,
+	MouseEventHandler,
+	forwardRef,
+	useImperativeHandle, useState,
+} from 'react';
 import { IS_DEVELOPMENT, isDefined } from '../helpers/common';
 import { getIntAndIncrement } from '../helpers/counter';
 
@@ -19,12 +28,17 @@ import { DatasetDocument } from '../demo/types';
 import { ResetZoomButton } from './common';
 
 
+export type SelectedPoints = Set<number>;
+export type SelectedWords = Set<string>;
+
 export class Scatterplot {
 
 	private readonly debugId: number;
 
 	private svgElem: SVGSVGElement;
 	private data: DatasetDocument[];
+
+	private selectedPointsChangeHandler: ((points: SelectedPoints) => void) | undefined;
 
 	private resizeObserver: ResizeObserver;
 
@@ -35,6 +49,7 @@ export class Scatterplot {
 	private yAxisGroup: Selection<SVGGElement, DatasetDocument, null, any>;
 	private zoomBehavior: ZoomBehavior<SVGSVGElement, DatasetDocument>;
 
+	private fixedRatio: boolean = false;
 	private xScale: ScaleLinear<number, number>;
 	private yScale: ScaleLinear<number, number>;
 	private xScaleWithZoomTransform: ScaleLinear<number, number>;
@@ -51,10 +66,16 @@ export class Scatterplot {
 	private width: number;
 	private height: number;
 
-	private xMargin: number = 30;
-	private yMargin: number = 30;
+	private xMarginTop: number = 32;
+	private xMarginBottom: number = 32;
+	private yMarginTop: number = 16;
+	private yMarginBottom: number = 32;
 
-	private selectedPoints = new Set<number>();
+	private selectedPoints: Set<number> = new Set<number>();
+	private selectedPointsImmutable: SelectedPoints = new Set<number>();
+
+	private filteredPoints = new Set<number>();
+	private filteredPointsImmutable: SelectedPoints = new Set<number>();
 
 	constructor(wrapperElem: HTMLElement, debugId?: number) {
 
@@ -62,6 +83,39 @@ export class Scatterplot {
 		this.data = [];
 
 		this.init(wrapperElem);
+	}
+
+	public setSelectedPointsChangeHandler(handler: (points: SelectedPoints) => void | undefined) {
+		this.selectedPointsChangeHandler = handler;
+	}
+
+	public setSelectedPoints(points: SelectedPoints) {
+
+		if (this.selectedPointsImmutable === points) {
+			return;
+		}
+
+		this.selectedPoints.clear();
+		for (const id of points) {
+			this.selectedPoints.add(id);
+		}
+
+		this.selectedPointsImmutable = points;
+
+		this.mapSelectedPointsToElements();
+
+	}
+
+	private mapSelectedPointsToElements() {
+
+		IS_DEVELOPMENT && console.log(
+			`[ScatterplotD3][${this.debugId}] mapSelectedPointsToElements`, this.selectedPoints,
+		);
+
+		// TODO: maybe there is a more effective way
+		this.dataGroup.selectAll('.point')
+			.data(this.data)
+			.classed('selected', (d) => this.selectedPoints.has(d.id));
 	}
 
 	private init(wrapperElem: HTMLElement) {
@@ -174,11 +228,41 @@ export class Scatterplot {
 
 		}
 
+		if (this.fixedRatio) {
+			const min = Math.min(this.minX, this.minY);
+			const max = Math.max(this.maxX, this.maxY);
+			this.minX = min;
+			this.minY = min;
+			this.maxX = max;
+			this.maxY = max;
+		}
+
 	}
 
 	private updateScalesDomains() {
 		this.xScale.domain([this.minX, this.maxX]);
 		this.yScale.domain([this.minY, this.maxY]);
+	}
+
+	private updateScalesRanges() {
+
+		const width = this.width - this.xMarginTop - this.xMarginBottom;
+		const height = this.height - this.yMarginTop - this.yMarginBottom;
+
+		if (this.fixedRatio) {
+			const size = Math.min(width, height);
+			this.xScale.range([0, size]);
+			this.yScale.range([size, 0]);
+		} else {
+			this.xScale.range([0, width]);
+			this.yScale.range([height, 0]);
+		}
+
+		this.xAxisGroup
+			.attr('transform', `translate(${this.xMarginBottom},${this.yScale.range()[0] + this.yMarginTop})`);
+		this.yAxisGroup
+			.attr('transform', `translate(${this.xMarginTop},${this.yMarginTop})`);
+
 	}
 
 	private updateScalesWithZoomTransform(transform?: ZoomTransform): boolean {
@@ -234,6 +318,42 @@ export class Scatterplot {
 		}
 	}
 
+	public zoomToPoint(id: number, withAnimation: boolean = true) {
+		const x = this.xScale(this.data[id].position.x);
+		const y = this.yScale(this.data[id].position.y);
+		if (withAnimation) {
+			// with animation:
+			// TODO: remove noinspection once type definitions are fixed
+			// noinspection TypeScriptValidateTypes
+			this.svgSelection.transition()
+				.duration(750)
+				.call(this.zoomBehavior.translateTo, x, y);
+		} else {
+			this.svgSelection.call(this.zoomBehavior.translateTo, x, y);
+		}
+	}
+
+	public setFixedRatio(fixed: boolean) {
+		if (fixed === this.fixedRatio) {
+			return;
+		}
+		IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] setFixedRatio`, fixed);
+		this.fixedRatio = fixed;
+		this.computeDataBounds();
+		this.updateScalesDomains();
+		// only attempt to render if the size has already been initialized
+		// the size is initialized in updateSize() which also call
+		// these methods (apart from resetZoom) to re-render the plot
+		if (this.sizeInitialized) {
+			this.updateScalesRanges();
+			this.resetZoom(false);
+			this.updateScalesWithZoomTransform();
+			this.mapAxesToElements();
+			this.mapDataToElements();
+		}
+	}
+
+
 	private updateSize(width: number, height: number) {
 
 		if (width === this.width && height === this.height) {
@@ -252,18 +372,12 @@ export class Scatterplot {
 		// min-x min-y width height
 		this.svgSelection.attr('viewBox', [0, 0, width, height]);
 
-		this.xScale.range([0, this.width - 2 * this.xMargin]);
-		this.yScale.range([this.height - 2 * this.yMargin, 0]);
+		this.updateScalesRanges();
 
 		this.sizeInitialized = true;
 
 		this.dataGroupWrapper
-			.attr('transform', `translate(${this.xMargin},${this.yMargin})`);
-
-		this.xAxisGroup
-			.attr('transform', `translate(${this.xMargin},${this.height - this.yMargin})`);
-		this.yAxisGroup
-			.attr('transform', `translate(${this.xMargin},${this.yMargin})`);
+			.attr('transform', `translate(${this.xMarginTop},${this.yMarginTop})`);
 
 		this.updateScalesWithZoomTransform();
 		this.mapAxesToElements();
@@ -364,7 +478,10 @@ export class Scatterplot {
 
 	private onSelectedPointsChange() {
 		IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] onSelectedPointsChange`, this.selectedPoints);
-		// TODO: emit event / invoke callback
+		this.selectedPointsImmutable = new Set(this.selectedPoints);
+		if (this.selectedPointsChangeHandler !== undefined) {
+			this.selectedPointsChangeHandler(this.selectedPointsImmutable);
+		}
 	}
 
 	public setData(data: DatasetDocument[]) {
@@ -374,6 +491,9 @@ export class Scatterplot {
 		this.data = data;
 		this.computeDataBounds();
 		this.updateScalesDomains();
+
+		this.selectedPoints = new Set();
+		this.selectedPointsImmutable = new Set();
 
 		// only attempt to render if the size has already been initialized
 		// the size is initialized in updateSize() which also call
@@ -406,12 +526,32 @@ export class Scatterplot {
 
 export interface ScatterplotWrapperProps {
 	data: DatasetDocument[] | undefined;
+	onSelectedPointsChange: (points: SelectedPoints) => void;
+	selectedPoints: SelectedPoints;
+	selectedWords: SelectedWords;
 }
 
-export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
+export const ScatterplotWrapper = forwardRef((
+	{
+		data,
+		onSelectedPointsChange,
+		selectedPoints,
+	}: ScatterplotWrapperProps, ref,
+) => {
 
 	const id = useId();
 	const plotRef = useRef<Scatterplot | null>(null);
+
+	const [fixedRatio, setFixedRatio] = useState<boolean>(false);
+
+	useImperativeHandle(ref, () => {
+		const initId = getIntAndIncrement('ScatterplotWrapper:useImperativeHandle');
+		IS_DEVELOPMENT && console.log(
+			`[ScWr][${id}] useImperativeHandle ${initId} callback invocation`,
+			plotRef.current != null,
+		);
+		return plotRef.current;
+	}, [id]);
 
 	// see https://react.dev/reference/react-dom/components/common#ref-callback
 	// see https://julesblom.com/writing/ref-callback-use-cases
@@ -463,6 +603,34 @@ export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 
 	}, []);
 
+	const handleSetFixedRatio = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
+
+		event.preventDefault();
+
+		setFixedRatio(prev => !prev);
+
+	}, [setFixedRatio]);
+
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof Scatterplot)) {
+			return;
+		}
+
+		plotRef.current.setSelectedPointsChangeHandler(onSelectedPointsChange);
+
+	}, [onSelectedPointsChange]);
+
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof Scatterplot)) {
+			return;
+		}
+
+		plotRef.current.setFixedRatio(fixedRatio);
+
+	}, [fixedRatio]);
+
 	useEffect(() => {
 
 		if (!(plotRef.current instanceof Scatterplot)) {
@@ -486,15 +654,28 @@ export const ScatterplotWrapper = ({ data }: ScatterplotWrapperProps) => {
 
 	}, [id, data]);
 
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof Scatterplot)) {
+			return;
+		}
+
+		plotRef.current.setSelectedPoints(selectedPoints);
+
+	}, [selectedPoints]);
+
 	return (
 		<div
 			ref={handleWrapperElemRefChange}
 			className="scatterplot-wrapper"
 		>
 			<div className="toolbar">
+				<button type="button" name="toggleRatio" className="btn btn-sm" onClick={handleSetFixedRatio}>
+					<span>XY: {fixedRatio ? '1:1' : 'auto'}</span>
+				</button>
 				<ResetZoomButton onClick={handleResetZoom} />
 			</div>
 		</div>
 	);
 
-};
+});

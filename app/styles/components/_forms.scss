@@ -1,0 +1,228 @@
+//
+// Forms
+// --------------------------------------------------
+
+// NOTE: Some styles are taken from Twitter Bootstrap 4
+
+// Normalize non-controls
+//
+// Restyle and baseline non-control form elements.
+
+fieldset {
+	padding: 0;
+	margin: 0;
+	border: 0;
+	// Chrome and Firefox set a `min-width: min-content;` on fieldsets,
+	// so we reset that to ensure it behaves more like a standard block element.
+	// See https://github.com/twbs/bootstrap/issues/12359.
+	min-width: 0;
+}
+
+legend {
+	display: block;
+	width: 100%;
+	padding: 0;
+	line-height: inherit;
+	color: $gray;
+	border: 0;
+}
+
+label {
+	display: inline-block;
+	max-width: 100%; // Force IE8 to wrap long content (see https://github.com/twbs/bootstrap/issues/13141)
+	margin: 0 0 0.375rem 0;
+	font-weight: 500;
+}
+
+// Normalize form controls
+//
+// While most of our form styles require extra classes, some basic normalization
+// is required to ensure optimum display with or without those classes to better
+// address browser inconsistencies.
+
+// Override content-box in Normalize (* isn't specific enough)
+input[type="search"] {
+	box-sizing: border-box;
+}
+
+// Form validation states
+//
+// Used in _forms.scss to generate the form validation CSS for warnings, errors,
+// and successes.
+
+@mixin form-control-validation($color) {
+
+	// Color the label and help text
+	.form-control-feedback,
+	.form-control-label,
+	.form-check-label,
+	.custom-control,
+	.group-header .group-name {
+		color: $color;
+	}
+
+	// Set the border and box shadow on specific inputs to match
+	.form-control {
+		border-color: lighten($color, 20%);
+
+		&:focus {
+			border-color: $color;
+			// box-shadow: inset 0 1px 1px rgba($black,.075), 0 0 4px lighten($color, 20%);
+		}
+	}
+
+}
+
+// Placeholder text
+@mixin placeholder($color: lighten($gray-light, 40%)) {
+	// Firefox
+	&::-moz-placeholder {
+		color: $color;
+		opacity: 1; // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526
+	}
+	// Internet Explorer 10+
+	&:-ms-input-placeholder {
+		color: $color;
+	}
+	// Safari and Chrome
+	&::-webkit-input-placeholder {
+		color: $color;
+	}
+}
+
+@mixin form-control-focus($color: lighten($brand-primary, 20%)) {
+	$color-rgba: rgba(red($color), green($color), blue($color), .6);
+	&:focus {
+		border-color: $color;
+		outline: 0;
+		// box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 4px $color-rgba;
+		// box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+	}
+}
+
+// Common form controls
+//
+// Shared size and type resets for form controls. Apply `.form-control` to any
+// of the following form controls:
+//
+// select
+// textarea
+// input[type="text"]
+// input[type="password"]
+// input[type="datetime"]
+// input[type="datetime-local"]
+// input[type="date"]
+// input[type="month"]
+// input[type="time"]
+// input[type="week"]
+// input[type="number"]
+// input[type="email"]
+// input[type="url"]
+// input[type="search"]
+// input[type="tel"]
+// input[type="color"]
+
+.form-control {
+	display: block;
+	width: 100%;
+	//height: 40px; // Make inputs at least the height of their button counterpart (base line-height + padding + border)
+	padding: 6px 12px;
+	font-size: 1rem;
+	line-height: 1.5;
+	color: $gray;
+	background-color: $white;
+	background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+	border: 2px solid rgba($black, .15);
+	border-radius: 0; // Note: This has no effect on <select>s in some browsers, due to the limited stylability of <select>s in CSS.
+	//@include box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
+	transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+
+	// Customize the `:focus` state to imitate native WebKit styles.
+	@include form-control-focus;
+
+	// Placeholder
+	@include placeholder;
+
+	// Unstyle the caret on `<select>`s in IE10+.
+	&::-ms-expand {
+		border: 0;
+		background-color: transparent;
+	}
+
+	// Disabled and read-only inputs
+	//
+	// HTML5 says that controls under a fieldset > legend:first-child won't be
+	// disabled if the fieldset is disabled. Due to implementation difficulty, we
+	// don't honor that edge case; we style them as disabled anyway.
+	&[disabled],
+	&[readonly],
+	fieldset[disabled] & {
+		background-color: $gray-lighter;
+		opacity: 1; // iOS fix for unreadable disabled content; see https://github.com/twbs/bootstrap/issues/11655
+	}
+
+	&[disabled],
+	fieldset[disabled] & {
+		cursor: not-allowed;
+	}
+
+	// [converter] extracted textarea& to textarea.form-control
+}
+
+select.form-control {
+	background-color: $white;
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+	background-repeat: no-repeat;
+	background-position: right .75rem center;
+	background-size: 16px 12px;
+	appearance: none;
+}
+
+// Reset height for `textarea`s
+textarea.form-control {
+	height: auto;
+}
+
+// Search inputs in iOS
+//
+// This overrides the extra rounded corners on search inputs in iOS so that our
+// `.form-control` class can properly style them. Note that this cannot simply
+// be added to `.form-control` as it's not specific enough. For details, see
+// https://github.com/twbs/bootstrap/issues/11586.
+
+input[type="search"] {
+	-webkit-appearance: none;
+}
+
+.form-control-label {
+	display: block;
+}
+
+.form-group {
+	.btn-action {
+		margin-bottom: .5rem;
+	}
+}
+
+// Feedback states
+.has-success {
+	@include form-control-validation($brand-success);
+}
+
+.has-warning {
+	@include form-control-validation($brand-warning);
+}
+
+.has-error {
+	@include form-control-validation($brand-danger);
+}
+
+.help-block, .form-control-feedback {
+	display: block;
+	margin-top: 0.375rem;
+	margin-bottom: .625rem;
+}
+
+.form-group {
+	margin: 0 0 1rem 0;
+}
