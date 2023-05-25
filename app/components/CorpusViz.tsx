@@ -376,7 +376,7 @@ const CorpusViz = () => {
 		setDatasetQuery({ status: 'loading' });
 		setCorpusName(newCorpusName);
 		setWordcloudViewParams(null);
-		setShouldFilter(false);
+		setShouldFilter(0);
 		setSelectedPoints(new Set());
 		setSelectedWords(new Set());
 	}, []);

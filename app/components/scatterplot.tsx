@@ -539,6 +539,8 @@ export class Scatterplot {
 			this.updateScalesWithZoomTransform();
 			this.mapAxesToElements();
 			this.mapDataToElements();
+			this.mapSelectedPointsToElements();
+			this.mapSelectedWordsToElements();
 		}
 
 	}
