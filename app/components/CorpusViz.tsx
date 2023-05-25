@@ -18,6 +18,7 @@ import IconFileLinesRegular from '-!svg-react-loader?name=IconMinimizeLight!../i
 import IconFontCaseRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/font-case-regular.svg';
 import IconFilterRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/filter-regular.svg';
 import IconFilterSlashRegular from '-!svg-react-loader?name=IconMinimizeLight!../images/icons/filter-slash-regular.svg';
+import classNames from 'classnames';
 
 export interface QueryOperationLoading {
 	status: 'loading';
@@ -309,6 +310,8 @@ const CorpusViz = () => {
 	const [selectedPoints, setSelectedPoints] = useState<SelectedPoints>(new Set<number>());
 	const [selectedWords, setSelectedWords] = useState<SelectedWords>(new Set<string>());
 
+	const [shouldFilter, setShouldFilter] = useState<number>(0);
+
 	const handleSelectedPointsChange = useCallback((newSelectedPoints) => {
 		setSelectedPoints(newSelectedPoints);
 	}, []);
@@ -373,6 +376,7 @@ const CorpusViz = () => {
 		setDatasetQuery({ status: 'loading' });
 		setCorpusName(newCorpusName);
 		setWordcloudViewParams(null);
+		setShouldFilter(false);
 		setSelectedPoints(new Set());
 		setSelectedWords(new Set());
 	}, []);
@@ -394,7 +398,7 @@ const CorpusViz = () => {
 	// note: we always render the ScatterplotWrapper component so that is not recreated when changing datasets
 	//       (but it is hidden under the loading/error screen)
 	return (
-		<main className="app-content">
+		<main className={`app-content filter-mode-${shouldFilter}`}>
 			<ScatterplotWrapper
 				ref={scatterplotRef}
 				data={datasetQuery.status === 'success' ? datasetQuery.data.documents : undefined}
@@ -582,10 +586,18 @@ const CorpusViz = () => {
 								))}
 							</div>
 							<div className="controls-section-toolbar">
-								<button type="button" className="btn">
+								<button
+									type="button"
+									className="btn"
+									onClick={(event) => {
+										event.preventDefault();
+										event.stopPropagation();
+										setShouldFilter(prev => (prev + 1) % 3);
+									}}
+								>
 									<IconFilterRegular className="icon" aria-hidden={true} />
 									<span className="sr-only">Filter</span>
-									<span>Filter</span>
+									<span>Filter mode: {shouldFilter}</span>
 								</button>
 								{/*<button type="button" className="btn">*/}
 								{/*	<CirclesOverlapRegular className="icon" aria-hidden={true} />*/}

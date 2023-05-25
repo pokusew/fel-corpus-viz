@@ -75,8 +75,7 @@ export class Scatterplot {
 	private selectedPoints: Set<number> = new Set<number>();
 	private selectedPointsImmutable: SelectedPoints = new Set<number>();
 
-	private filteredPoints = new Set<number>();
-	private filteredPointsImmutable: SelectedPoints = new Set<number>();
+	private selectedWordsImmutable: SelectedWords = new Set<string>();
 
 	constructor(wrapperElem: HTMLElement, debugId?: number) {
 
@@ -84,6 +83,37 @@ export class Scatterplot {
 		this.data = [];
 
 		this.init(wrapperElem);
+	}
+
+	public setSelectedWords(points: SelectedWords) {
+
+		if (this.selectedWordsImmutable === points) {
+			return;
+		}
+
+		this.selectedWordsImmutable = points;
+
+		this.mapSelectedWordsToElements();
+
+	}
+
+	private mapSelectedWordsToElements() {
+
+		IS_DEVELOPMENT && console.log(
+			`[ScatterplotD3][${this.debugId}] mapSelectedWordsToElements`, this.selectedWordsImmutable,
+		);
+
+		// TODO: maybe there is a more effective way
+		this.dataGroup.selectAll('.point')
+			.data(this.data)
+			.classed('filtered', (d) => {
+				for (const w of this.selectedWordsImmutable) {
+					if (!d.wordCounts.has(w)) {
+						return false;
+					}
+				}
+				return true;
+			});
 	}
 
 	public setSelectedPointsChangeHandler(handler: (points: SelectedPoints) => void | undefined) {
@@ -542,6 +572,7 @@ export const ScatterplotWrapper = forwardRef((
 		data,
 		onSelectedPointsChange,
 		selectedPoints,
+		selectedWords,
 	}: ScatterplotWrapperProps,
 	ref,
 ) => {
@@ -670,6 +701,16 @@ export const ScatterplotWrapper = forwardRef((
 		plotRef.current.setSelectedPoints(selectedPoints);
 
 	}, [selectedPoints]);
+
+	useEffect(() => {
+
+		if (!(plotRef.current instanceof Scatterplot)) {
+			return;
+		}
+
+		plotRef.current.setSelectedWords(selectedWords);
+
+	}, [selectedWords]);
 
 	return (
 		<div

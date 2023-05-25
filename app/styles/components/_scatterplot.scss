@@ -9,7 +9,7 @@
 	overflow: hidden;
 }
 
-svg.scatterplot,svg.wordcloud {
+svg.scatterplot, svg.wordcloud {
 	display: block;
 	width: 100%;
 	height: 100%;
@@ -33,10 +33,15 @@ svg.scatterplot,svg.wordcloud {
 		&.selected {
 			fill: red;
 		}
+
+		&.filtered {
+			fill: green;
+		}
 	}
 
 	.word {
 		cursor: pointer;
+
 		&:hover {
 			fill: orange;
 		}
@@ -51,6 +56,31 @@ svg.scatterplot,svg.wordcloud {
 	}
 
 }
+
+.filter-mode-1 {
+
+	svg.scatterplot {
+
+		.point:not(.filtered) {
+			opacity: .2;
+		}
+
+	}
+
+}
+
+.filter-mode-2 {
+
+	svg.scatterplot {
+
+		.point:not(.filtered) {
+			display: none;
+		}
+
+	}
+
+}
+
 
 .toolbar {
 	position: absolute;
