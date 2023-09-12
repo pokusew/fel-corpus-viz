@@ -10,7 +10,7 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    cd ~/
    git clone https://github.com/nvm-sh/nvm.git .nvm
    cd ~/.nvm
-   git checkout v0.39.3
+   git checkout v0.39.5
    ```
 
 2. Add the following at the end of your `~/.bashrc`:
@@ -32,17 +32,17 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    export PATH="$HOME/.yarn/bin:$PATH"
    ```
 
-3. Restart your terminal. Verify nvm works (should print something like `0.39.3`):
+3. Restart your terminal. Verify nvm works (should print something like `0.39.5`):
    ```bash
    nvm -v
    ```
 
-4. Install the latest Node.js 18:
+4. Install the latest Node.js 20:
    ```bash
-   nvm install 18.*
+   nvm install 20.*
    ```
 
-5. Verify Node.js is installed and active (should print something like `v18.16.0`):
+5. Verify Node.js is installed and active (should print something like `v20.6.1`):
    ```bash
    node -v
    ```
@@ -68,7 +68,7 @@ standard [npm CLI](https://docs.npmjs.com/about-npm).
    yarn global add node-gyp nodemon sort-package-json doctoc
    ```
 
-10. Verify that Yarn global packages binaries are on your PATH (should print `2.0.22`):
+10. Verify that Yarn global packages binaries are on your PATH (should print `3.0.1`):
 	```bash
 	nodemon -v
 	```
