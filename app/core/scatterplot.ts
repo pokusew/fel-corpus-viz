@@ -40,8 +40,8 @@ export class Scatterplot {
 	private yScale: ScaleLinear<number, number>;
 	private xScaleWithZoomTransform: ScaleLinear<number, number>;
 	private yScaleWithZoomTransform: ScaleLinear<number, number>;
-	private xAxis: Axis<number | { valueOf(): number }>;
-	private yAxis: Axis<number | { valueOf(): number }>;
+	private xAxis: Axis<number>;
+	private yAxis: Axis<number>;
 
 	private minX: number;
 	private minY: number;
@@ -157,8 +157,8 @@ export class Scatterplot {
 		this.xScale = scaleLinear();
 		this.yScale = scaleLinear();
 
-		this.xAxis = axisBottom(this.xScale);
-		this.yAxis = axisLeft(this.yScale);
+		this.xAxis = axisBottom<number>(this.xScale);
+		this.yAxis = axisLeft<number>(this.yScale);
 
 		this.dataGroupWrapper = this.svgSelection.append('g')
 			.attr('class', 'data-wrapper');
@@ -297,10 +297,7 @@ export class Scatterplot {
 
 		transform = transform ?? zoomTransform(this.svgElem);
 
-		// TODO: remove noinspection once type definitions are fixed (LinearScale should be subtype of ZoomScale)
-		// noinspection TypeScriptValidateTypes
 		this.xScaleWithZoomTransform = transform.rescaleX(this.xScale);
-		// noinspection TypeScriptValidateTypes
 		this.yScaleWithZoomTransform = transform.rescaleY(this.yScale);
 
 		// need to rebind as the transform.rescaleX/Y always returns a new instance
@@ -318,7 +315,9 @@ export class Scatterplot {
 		// IS_DEVELOPMENT && console.log(`[ScatterplotD3][${this.debugId}] handleZoom`);
 
 		if (this.updateScalesWithZoomTransform(transform)) {
+			// @ts-ignore TODO: fix types
 			this.xAxisGroup.call(this.xAxis.scale(this.xScaleWithZoomTransform));
+			// @ts-ignore TODO: fix types
 			this.yAxisGroup.call(this.yAxis.scale(this.yScaleWithZoomTransform));
 		}
 
@@ -329,12 +328,12 @@ export class Scatterplot {
 	public resetZoom(withAnimation: boolean = true) {
 		if (withAnimation) {
 			// with animation:
-			// TODO: remove noinspection once type definitions are fixed
-			// noinspection TypeScriptValidateTypes
+			// @ts-ignore TODO: fix types
 			this.svgSelection.transition()
 				.duration(750)
 				.call(this.zoomBehavior.transform, zoomIdentity);
 		} else {
+			// @ts-ignore TODO: fix types
 			this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
 		}
 	}
@@ -344,12 +343,12 @@ export class Scatterplot {
 		const y = this.yScale(this.data[id - 1].position.y);
 		if (withAnimation) {
 			// with animation:
-			// TODO: remove noinspection once type definitions are fixed
-			// noinspection TypeScriptValidateTypes
+			// @ts-ignore TODO: fix types
 			this.svgSelection.transition()
 				.duration(750)
 				.call(this.zoomBehavior.translateTo, x, y);
 		} else {
+			// @ts-ignore TODO: fix types
 			this.svgSelection.call(this.zoomBehavior.translateTo, x, y);
 		}
 	}
@@ -407,7 +406,9 @@ export class Scatterplot {
 	}
 
 	private mapAxesToElements() {
+		// @ts-ignore TODO: fix types
 		this.xAxisGroup.call(this.xAxis);
+		// @ts-ignore TODO: fix types
 		this.yAxisGroup.call(this.yAxis);
 	}
 

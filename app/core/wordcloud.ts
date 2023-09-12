@@ -156,12 +156,12 @@ export class WordCloud {
 	public resetZoom(withAnimation: boolean = true) {
 		if (withAnimation) {
 			// with animation:
-			// TODO: remove noinspection once type definitions are fixed
-			// noinspection TypeScriptValidateTypes
+			// @ts-ignore TODO: fix types
 			this.svgSelection.transition()
 				.duration(750)
 				.call(this.zoomBehavior.transform, zoomIdentity);
 		} else {
+			// @ts-ignore TODO: fix types
 			this.svgSelection.call(this.zoomBehavior.transform, zoomIdentity);
 		}
 	}

@@ -23,7 +23,7 @@ const popover = createPopover(document.querySelector('body')!);
 
 // create the svg element and a group to hold all the circles
 
-const svg = select('#main-container').append('svg')
+const svg = select<SVGSVGElement, any>('#main-container').append('svg')
 	.attr('id', 'demo-scatterplot');
 const g = svg.append('g');
 
@@ -177,7 +177,7 @@ function handleClickDataPoint(event: PointerEvent, point: DatasetDocument) {
 
 // calculate and set the initial transformation matrix
 // see https://github.com/d3/d3-zoom#zoom
-const zoomExtent = zoom()
+const zoomExtent = zoom<SVGSVGElement, any>()
 	.scaleExtent([0.1, 10])
 	.on('zoom', zoomed);
 
@@ -185,6 +185,7 @@ svg.call(zoomExtent);
 
 const resetZoom = () => {
 	const initialTransform = zoomIdentity.translate(0, 0).scale(1);
+	// @ts-ignore TODO: fix types
 	svg.call(zoomExtent.transform, initialTransform);
 };
 
