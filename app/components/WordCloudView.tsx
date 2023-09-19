@@ -85,7 +85,7 @@ export const WordCloudView = ({ params, onClose, selectedWords, onSelectedWordsC
 			</div>
 			<div className="wordcloud-view-container">
 				{documents.map(doc => (
-					<div className="document-wrapper">
+					<div key={doc.id} className="document-wrapper">
 						<DocumentOverview document={doc} />
 						<WordCloudWrapper
 							document={doc}
